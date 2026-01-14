@@ -1,6 +1,6 @@
 # 🤖 Robot Software & Embedded Portfolio - 남상기
 
-“ROS2 Nav2 튜닝·센서퓨전·MCU 통신 안정화 경험(로그/실험 기반) 로봇 SW 엔지니어”
+“Nav2 튜닝·센서퓨전·통신 안정화로 ‘주행 안정성’을 숫자로 증명한 로봇 SW 엔지니어”
 
 > **Robot Software Engineer | 자율주행 · 센서융합 · AI 비전 · 임베디드 제어**
 
@@ -86,17 +86,17 @@ flowchart LR
 **🔹 결과(개선 효과)**
 - **로그 기준 경로 추종 흔들림 30%↓ (기본 파라미터 대비)**
 - **장애물 회피 경로 재계획 시간 40%↓ (튜닝 전 대비)**
-  - 정차 오차 ±5cm 수준(동일 경로 3m × 10회 평균)
+  - 정차 오차 ±5cm 수준(보정 전 대비, 동일 경로 3m × 10회 평균)
   - 측정 기준: rosout 로그 + bag replay
   - 테스트 조건: 복도 폭 120cm, 장애물 3개, 속도 제한 0.4m/s
 
 **What I Built (Owner Scope)**
 - sensor_fusion_node: LiDAR/IMU/Ultrasonic 타임스탬프 정합 → /obstacles 토픽 발행  
-  - 코드: [ros-repo-3](https://github.com/addinedu-ros-8th/ros-repo-3.git) 내 `ros2_ws/src/**/sensor_fusion_node*`
+  - 코드: [ros-repo-3](https://github.com/addinedu-ros-8th/ros-repo-3.git) 내 `ros2_ws/src/roscar_nav/nodes/sensor_fusion_node.py`
 - aruco_pose_correction: ArUco 인식 시 /initialpose 보정 트리거 → 정차 오차 감소  
-  - 코드: [ros-repo-3](https://github.com/addinedu-ros-8th/ros-repo-3.git) 내 `ros2_ws/src/**/aruco_pose_correction*`
+  - 코드: [ros-repo-3](https://github.com/addinedu-ros-8th/ros-repo-3.git) 내 `ros2_ws/src/roscar_nav/src/aruco_pose_correction.cpp`
 - teb_tuning_profile: 기본/협소/혼잡 파라미터 세트 분리 + 런타임 전환  
-  - 설정: [ros-repo-3](https://github.com/addinedu-ros-8th/ros-repo-3.git) 내 `config/teb/*.yaml`
+  - 설정: [ros-repo-3](https://github.com/addinedu-ros-8th/ros-repo-3.git) 내 `config/teb/teb_profile_narrow.yaml`
 - domain_bridge_config: 멀티 도메인 브리지 규칙 정의 및 토픽 매핑  
   - 설정: [ros-repo-3](https://github.com/addinedu-ros-8th/ros-repo-3.git) 내 `config/domain_bridge.yaml`
 
@@ -290,6 +290,7 @@ flowchart LR
 - 이동로봇+로봇팔 통합 시나리오 및 음성 인터페이스 아이디어
 - 구현 전 리스크(센서 인터페이스/비용/성능) 분석 기록
 - 문서: docs/design_notes.md에 요구사항/리스크 정리
+- 산출물: 요구사항 정의, 센서 조합 의사결정, 리스크 체크리스트
 
 ---
 
