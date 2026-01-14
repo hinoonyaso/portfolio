@@ -1,6 +1,6 @@
 # 🤖 Robot Software & Embedded Portfolio - 남상기
 
-“Nav2 튜닝·센서퓨전·통신 안정화로 ‘주행 안정성’을 숫자로 증명한 로봇 SW 엔지니어”
+“Nav2 튜닝·센서퓨전·통신 안정화로 ‘주행 안정성’을 숫자로 증명한 로봇 SW 엔지니어 (tracking/replan/stop)”
 
 > **Robot Software Engineer | 자율주행 · 센서융합 · AI 비전 · 임베디드 제어**
 
@@ -11,7 +11,7 @@
 ## 🔑 Key Highlights
 - ROS2 Nav2 기반 자율주행: SLAM/경로계획/TEB 튜닝으로 협소 환경 주행 안정화
 - 센서융합·좌표정합: LiDAR/IMU/초음파 타임싱크 및 TF 정합으로 추종·정차 정확도 개선
-- 임베디드 통신 안정화: UART/TCP 프로토콜 개선 + 재전송/로깅으로 시스템 신뢰성 확보
+- 통신 안정화: UART CRC/재전송 + 로그 기반 오류 추적으로 제어 신뢰성 확보
 
 ## 🧾 Evidence (Quick Links)
 - [Shoepernoma Diagram](#shoepernoma--ros2-기반-자율주행-신발-피킹-로봇-스마트-물류)
@@ -21,7 +21,11 @@
 - [COOLRO Demo](docs/demo.md#coolro-demo)
 - [COOLRO Metrics/Logs](docs/metrics.md#coolro-metrics)
 - [Pill Guy Diagram](#pill-guy--얼굴인식-스마트-알약-디스펜서-iot-헬스케어-로봇)
+- [Pill Guy Demo](docs/demo.md#pill-guy-demo)
+- [Pill Guy Metrics/Logs](docs/metrics.md#pill-guy-metrics)
 - [Fitness AI Trainer Diagram](#fitness-ai-trainer--딥러닝-자세-인식-기반-홈-피트니스-트레이너)
+- [Fitness AI Trainer Demo](docs/demo.md#fitness-ai-trainer-demo)
+- [Fitness AI Trainer Metrics/Logs](docs/metrics.md#fitness-ai-trainer-metrics)
 - [Shoepernoma Repo](https://github.com/addinedu-ros-8th/ros-repo-3.git)
 - [Pill Guy Repo](https://github.com/addinedu-ros-8th/iot-repo-1.git)
 - [Fitness AI Trainer Repo](https://github.com/addinedu-ros-8th/deeplearning-repo-1.git)
@@ -29,16 +33,17 @@
 Demo/Logs는 docs/ 폴더에 요약 링크로 정리했습니다.
 
 ## 🧰 Tech Stack Snapshot
-ROS2 / Nav2(TEB) / TF2 / OpenCV / MCU(UART) / TCP / PyQt (+ MediaPipe, Flutter는 프로젝트별 사용)
+Core: ROS2 / Nav2(TEB) / TF2 / OpenCV / MCU(UART) / TCP  
+Plus: PyQt / MediaPipe / Flutter (프로젝트별 사용)
 
 ## 🧩 Projects
 
-### 1. Shoepernoma – ROS2 기반 자율주행 신발 피킹 로봇 (스마트 물류)
+### 1. Shoepernoma – ROS2 기반 자율주행 신발 피킹 로봇 (스마트 물류) **(Flagship)**
 
 - **Repo**: https://github.com/addinedu-ros-8th/ros-repo-3.git
 
 **개요**  
-Shoepernoma는 ROS2 기반 자율주행 로봇으로, 매장에서 고객 요청 신발 박스를 자동 피킹하는 시스템입니다. SLAM/경로계획과 객체 인식을 결합해 자율 이동과 피킹을 수행합니다.
+Shoepernoma는 ROS2 기반 자율주행 피킹 로봇이며, 제가 Nav2 튜닝/센서융합/정밀정차 모듈을 설계·구현했습니다. SLAM/경로계획과 객체 인식을 결합해 자율 이동과 피킹을 수행합니다.
 
 **사용 기술 스택**
 - 하드웨어: 자율주행 플랫폼, 2D LiDAR, RGB-D 카메라, 초음파 센서, IMU, micro-ROS MCU, 로봇 암/리프트
@@ -87,18 +92,20 @@ flowchart LR
 - **로그 기준 경로 추종 흔들림 30%↓ (기본 파라미터 대비)**
 - **장애물 회피 경로 재계획 시간 40%↓ (튜닝 전 대비)**
   - 정차 오차 ±5cm 수준(보정 전 대비, 동일 경로 3m × 10회 평균)
+  - 흔들림 정의: cross-track error(RMS)
+  - 재계획 정의: compute_path_to_pose 요청~응답 평균
   - 측정 기준: rosout 로그 + bag replay
   - 테스트 조건: 복도 폭 120cm, 장애물 3개, 속도 제한 0.4m/s
 
 **What I Built (Owner Scope)**
 - sensor_fusion_node: LiDAR/IMU/Ultrasonic 타임스탬프 정합 → /obstacles 토픽 발행  
-  - 코드: [ros-repo-3](https://github.com/addinedu-ros-8th/ros-repo-3.git) 내 `ros2_ws/src/roscar_nav/nodes/sensor_fusion_node.py`
+  - 코드: [sensor_fusion_node.py](https://github.com/addinedu-ros-8th/ros-repo-3/blob/main/ros2_ws/src/roscar_nav/nodes/sensor_fusion_node.py)
 - aruco_pose_correction: ArUco 인식 시 /initialpose 보정 트리거 → 정차 오차 감소  
-  - 코드: [ros-repo-3](https://github.com/addinedu-ros-8th/ros-repo-3.git) 내 `ros2_ws/src/roscar_nav/src/aruco_pose_correction.cpp`
+  - 코드: [aruco_pose_correction.cpp](https://github.com/addinedu-ros-8th/ros-repo-3/blob/main/ros2_ws/src/roscar_nav/src/aruco_pose_correction.cpp)
 - teb_tuning_profile: 기본/협소/혼잡 파라미터 세트 분리 + 런타임 전환  
-  - 설정: [ros-repo-3](https://github.com/addinedu-ros-8th/ros-repo-3.git) 내 `config/teb/teb_profile_narrow.yaml`
+  - 설정: [teb_profile_narrow.yaml](https://github.com/addinedu-ros-8th/ros-repo-3/blob/main/config/teb/teb_profile_narrow.yaml)
 - domain_bridge_config: 멀티 도메인 브리지 규칙 정의 및 토픽 매핑  
-  - 설정: [ros-repo-3](https://github.com/addinedu-ros-8th/ros-repo-3.git) 내 `config/domain_bridge.yaml`
+  - 설정: [domain_bridge.yaml](https://github.com/addinedu-ros-8th/ros-repo-3/blob/main/config/domain_bridge.yaml)
 
 **배운 점 및 고찰**
 - ROS2 노드 인터페이스 설계 및 DDS QoS 영향 이해
@@ -157,7 +164,9 @@ flowchart LR
 **🔹 결과(개선 효과)**
 - **UART 오류율 60%↓ (필터링/CRC 적용 전 대비)**
 - **추종 거리 편차 ±20cm → ±8cm (PID/센서 융합 적용 후)**
-  - 실외 주행 추종 지연 200ms → 80ms 수준(로그 기준)
+  - 추종 지연 200ms → 80ms 수준(로그 기준)
+  - UART 오류율 정의: 오류 패킷/전체 패킷 비율
+  - 거리 편차 정의: 목표거리 대비 오차 평균/표준편차
   - 측정 기준: 동일 루트 20m × 8회 평균, UART 오류 로그 집계
   - 테스트 조건: 인원 1명, 평균 보행 1.0m/s
 
@@ -216,6 +225,7 @@ flowchart LR
 **🔹 결과(개선 효과)**
 - 인증 성공률 15%p↑(조도 변화 테스트)
 - 로그 누락률 0.5% 이하로 감소(재전송 로그 기준)
+  - 인증 정의: 임베딩 매칭 성공률
   - 측정 기준: 실내 조도 100~500 lux, 사용자 5명 × 30회 평균
   - 테스트 조건: 네트워크 지연 100~300ms 환경
 
@@ -272,6 +282,7 @@ flowchart LR
 **🔹 결과(개선 효과)**
 - 프레임 드롭 30%↓, 피드백 지연 120ms → 50ms
 - 체형 변화 테스트에서 오검출률 20%↓
+  - 오검출 정의: 기준 포즈 대비 오분류 비율
   - 측정 기준: 1080p/30fps 환경, 세트당 3분 × 5회 평균
   - 테스트 조건: 체형 3종(키/체중 구간) 비교
 

@@ -38,3 +38,39 @@
 
 ### Evidence
 - UART 로그 캡처: (링크/파일명)
+
+## Pill Guy Metrics
+### Definitions
+- 인증 성공률: 매칭 성공/전체 요청 비율
+- 로그 누락률: 누락 로그/전체 투약 기록 비율
+
+### Baseline vs After
+- Baseline: 재전송/캐싱 적용 전
+- After: 재전송/캐싱 적용 후
+
+### Results Table
+| Metric | Baseline | After | Delta |
+| --- | --- | --- | --- |
+| Auth success rate | TBD | TBD | TBD |
+| Log missing rate | TBD | TBD | TBD |
+
+### Evidence
+- 통신 로그 캡처: (링크/파일명)
+
+## Fitness AI Trainer Metrics
+### Definitions
+- 오검출률: 기준 포즈 대비 오분류 비율
+- 지연: 프레임 입력~피드백 출력 평균
+
+### Baseline vs After
+- Baseline: 최적화 전
+- After: 프레임 스킵/경량화 적용 후
+
+### Results Table
+| Metric | Baseline | After | Delta |
+| --- | --- | --- | --- |
+| Mis-detection rate | TBD | TBD | TBD |
+| Feedback latency | TBD | TBD | TBD |
+
+### Evidence
+- 로그 캡처/그래프: (링크/파일명)
