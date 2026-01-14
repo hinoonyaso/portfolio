@@ -7,3 +7,6 @@
 ## Risk Notes
 - 센서 간 인터페이스/동기화 리스크
 - 모델 연산 부하 및 리소스 제약 리스크
+
+## Summary
+- LiDAR vs Camera 비용 분석표 포함
