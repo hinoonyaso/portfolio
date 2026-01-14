@@ -2,7 +2,7 @@
 
 “Nav2 튜닝·센서퓨전·통신 안정화로 ‘주행 안정성’을 숫자로 증명한 로봇 SW 엔지니어 (tracking/replan/stop)”
 
-**Contact**: sangki.nam.dev@gmail.com · https://github.com/addinedu-ros-8th
+**Contact**: hinoonyaso@gmail.com · https://github.com/hinoonyaso
 
 본 README는 GitHub 포트폴리오 형식의 프로젝트 요약입니다. 각 프로젝트는 **문제 → 선택 → 결과** 흐름과 **Performance Evaluation** 링크로 정리했습니다.
 
