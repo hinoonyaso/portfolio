@@ -40,6 +40,14 @@ Core: ROS2 / Nav2(TEB) / TF2 / OpenCV / MCU(UART) / TCP
 - Nav2 SLAM/경로 계획 파이프라인 구축, TEB Local Planner 튜닝
 - 센서 융합 노드 개발, ArUco 기반 정밀 위치 보정, Domain Bridge 구성
 
+**Design Decision Note**
+- DWA/A* 기반 접근은 협소 복도에서 진동이 커 실사용에 부적합했고,
+- 엔코더 부재 환경에서 TEB + profile switching이 가장 재현성 높은 결과를 보였음.
+
+**Control Concept**
+- 주행 상태를 STANDBY / DRIVING / PRECISION STOP으로 분리해
+  정밀 정차 구간에서 제어 파라미터를 명시적으로 전환.
+
 **Performance Evaluation**
 - Demo: [docs/demo.md#shoepernoma-demo](docs/demo.md#shoepernoma-demo) — 주행/정차/회피 시퀀스 확인
 - Metrics/Logs: [docs/metrics.md#shoepernoma-metrics](docs/metrics.md#shoepernoma-metrics) — CTE RMS·replan latency 표, 재현 절차 포함
@@ -103,6 +111,10 @@ flowchart LR
 **내 역할 (팀 3인)**
 - 추종 제어 로직, MediaPipe 자세 인식/스윙 분석, UART 프로토콜 설계
 
+**Field Issue Handling**
+- 모터 노이즈 환경에서 UART 오류가 발생해
+  CRC + retry + safe-stop 정책으로 제어 신뢰도를 확보.
+
 **Performance Evaluation**
 - Demo: [docs/demo.md#coolro-demo](docs/demo.md#coolro-demo) — 추종/자세 피드백 흐름 확인
 - Metrics/Logs: [docs/metrics.md#coolro-metrics](docs/metrics.md#coolro-metrics) — UART 오류율·거리 편차 표, 프로토콜 스펙 포함
@@ -150,6 +162,10 @@ flowchart LR
 **내 역할 (2인 협업)**
 - 얼굴 인식 알고리즘, 일정 관리 로직, 모터 제어(Serial), 로그 통신 모듈
 
+**Requirement-driven Design**
+- 인증 실패, 네트워크 단절, 로그 누락을 핵심 리스크로 정의하고
+  로컬 캐시 및 재전송 구조로 설계.
+
 **Performance Evaluation**
 - Demo: [docs/demo.md#pill-guy-demo](docs/demo.md#pill-guy-demo) — 인증/투약 흐름 확인
 - Metrics/Logs: [docs/metrics.md#pill-guy-metrics](docs/metrics.md#pill-guy-metrics) — 인증·로그 지표 표, 재전송 정책 포함
@@ -183,6 +199,14 @@ flowchart LR
 
 **내 역할 (개인 프로젝트)**
 - 포즈 추출/각도 계산, 분류 모델 적용, UI 및 로그 설계
+
+**Model Insight**
+- 짧은 시퀀스에서는 동작 경계 오검출이 잦았고,
+- 시퀀스 길이를 늘리자 관절 이동 패턴이 안정적으로 반영됨.
+
+**Limitation**
+- 데이터 불균형으로 일부 동작에서 재현성 한계가 있었으며,
+  추후 데이터 증강/클래스 리밸런싱을 고려.
 
 **Performance Evaluation**
 - Demo: [docs/demo.md#fitness-ai-trainer-demo](docs/demo.md#fitness-ai-trainer-demo) — 실시간 피드백 확인
