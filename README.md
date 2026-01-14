@@ -17,6 +17,7 @@
 
 ## 🧰 Tech Stack Snapshot
 Core: ROS2 / Nav2(TEB) / TF2 / OpenCV / MCU(UART) / TCP
+Environment: Ubuntu 22.04 / ROS2 Humble / Gazebo
 
 ---
 
@@ -31,6 +32,10 @@ Core: ROS2 / Nav2(TEB) / TF2 / OpenCV / MCU(UART) / TCP
 - 선택: TEB cost 재조정 + narrow profile 분리/스위칭, TF/타임스탬프 정합 강화
 - 결과: CTE RMS 30%↓, replan latency 40%↓, 정차 오차 ±5cm
 
+**Design Decision Note**
+- DWA/A* 기반 접근은 협소 복도에서 진동이 커 실사용에 부적합했고,
+- 엔코더 부재 환경에서 TEB + profile switching이 가장 재현성 높은 결과를 보였음.
+
 **핵심 기술 (Why)**
 - **Nav2(TEB)**: 제약 120cm 복도/0.4m/s → 결정: TEB weight 재조정
 - **TF2**: 제약 TF 드리프트 → 결정: 프레임 정합 유지로 흔들림 억제
@@ -39,10 +44,6 @@ Core: ROS2 / Nav2(TEB) / TF2 / OpenCV / MCU(UART) / TCP
 **내 역할 (팀 4인)**
 - Nav2 SLAM/경로 계획 파이프라인 구축, TEB Local Planner 튜닝
 - 센서 융합 노드 개발, ArUco 기반 정밀 위치 보정, Domain Bridge 구성
-
-**Design Decision Note**
-- DWA/A* 기반 접근은 협소 복도에서 진동이 커 실사용에 부적합했고,
-- 엔코더 부재 환경에서 TEB + profile switching이 가장 재현성 높은 결과를 보였음.
 
 **Control Concept**
 - 주행 상태를 STANDBY / DRIVING / PRECISION STOP으로 분리해
@@ -89,7 +90,7 @@ flowchart LR
 
 **협업 사례**
 - S: TEB 파라미터 충돌로 주행 품질 편차 발생
-- A: PR에서 로그 비교 후 narrow profile 분리 합의
+- A: 로그 기반 비교로 profile 분리 기준을 팀 표준으로 정립
 - R: 케이스별 profile 분리 후 튜닝 논쟁이 실험 로그 기준으로 표준화됨
 
 ---
