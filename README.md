@@ -69,10 +69,10 @@ flowchart LR
 - 파라미터 롤백: 기본/협소 profile 즉시 복구 플로우
 
 **What I Built (Owner Scope)**
-- **[Code: sensor_fusion_node.py](https://github.com/addinedu-ros-8th/ros-repo-3/blob/master/ros2_ws/src/roscar_nav/nodes/sensor_fusion_node.py)**
-- **[Code: aruco_pose_correction.cpp](https://github.com/addinedu-ros-8th/ros-repo-3/blob/master/ros2_ws/src/roscar_nav/src/aruco_pose_correction.cpp)**
-- **[Config: teb_profile_narrow.yaml](https://github.com/addinedu-ros-8th/ros-repo-3/blob/master/config/teb/teb_profile_narrow.yaml)**
-- **[Config: domain_bridge.yaml](https://github.com/addinedu-ros-8th/ros-repo-3/blob/master/config/domain_bridge.yaml)**
+- **[Code: sensor_fusion_node.py](https://github.com/addinedu-ros-8th/ros-repo-3/search?q=sensor_fusion_node.py&type=code)**
+- **[Code: aruco_pose_correction.cpp](https://github.com/addinedu-ros-8th/ros-repo-3/search?q=aruco_pose_correction.cpp&type=code)**
+- **[Config: teb_profile_narrow.yaml](https://github.com/addinedu-ros-8th/ros-repo-3/search?q=teb_profile_narrow.yaml&type=code)**
+- **[Config: domain_bridge.yaml](https://github.com/addinedu-ros-8th/ros-repo-3/search?q=domain_bridge.yaml&type=code)**
 
 **실무 연결**: 랙 구간(120cm)에서 profile 스위칭과 TF 정합으로 stop jitter를 줄이고 replan 응답성을 올리는 방식으로 적용.
 
