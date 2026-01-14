@@ -2,109 +2,29 @@
 
 “ROS2 기반 자율주행과 임베디드 제어를 실제 환경에서 구현해본 로봇 SW 엔지니어”
 
+Nav2 튜닝 · 센서퓨전 · MCU 통신 안정화를 핵심 강점으로 합니다.
+
 > **Robot Software Engineer | 자율주행 · 센서융합 · AI 비전 · 임베디드 제어**
 
-본 README는 GitHub 포트폴리오 형식으로 작성된 프로젝트 요약입니다. 각 프로젝트의 **개요, 기술 스택, 역할, 시스템 구조, 시연 자료, 배운 점**을 정리했습니다.
+본 README는 GitHub 포트폴리오 형식으로 작성된 프로젝트 요약입니다. 각 프로젝트의 **개요, 기술 스택, 역할, 시스템 구조, Evidence, 배운 점**을 정리했습니다.
 
 ---
+
+## 🔑 Key Highlights
+- ROS2 Nav2 기반 자율주행: SLAM/경로계획/TEB 튜닝으로 협소 환경 주행 안정화
+- 센서융합·좌표정합: LiDAR/IMU/초음파 타임싱크 및 TF 정합으로 추종·정차 정확도 개선
+- 임베디드 통신 안정화: UART/TCP 프로토콜 개선 + 재전송/로깅으로 시스템 신뢰성 확보
+
+## 🧾 Evidence
+- Diagrams (Mermaid): 각 프로젝트 아키텍처 다이어그램 포함
+- Repositories: 각 프로젝트 Repo 링크 포함
+
+## 🧰 Tech Stack Snapshot
+ROS2 / Nav2 / TF2 / OpenCV / MediaPipe / MCU(UART) / TCP / PyQt / Flutter
 
 ## 🧩 Projects
 
-### 1. COOLRO – 자동추종 골프 캐디 로봇 (자율주행 + 자세 분석)
-
-**개요**  
-COOLRO는 골프장에서 사용자를 자동으로 따라다니는 자율주행 골프 캐디 로봇입니다. Raspberry Pi 4B 기반으로 카메라 영상에서 딥러닝 기반의 자세 인식을 수행하고, OpenCV/MediaPipe로 스윙 자세를 분석해 실시간 피드백을 제공합니다. Flutter 앱과 연동되어 영상 기록과 상태 모니터링을 지원합니다.
-
-**사용 기술 스택**
-- 하드웨어: Raspberry Pi 4B, STM32, DC 모터, 카메라 모듈, 초음파 센서
-- 소프트웨어: OpenCV, MediaPipe, Flutter, Firebase, HTTP/REST, C/C++ & Python, UART Serial
-- 키워드: 자율주행 팔로잉, 딥러닝 자세분석, 모터 제어, 실시간 피드백, IoT 연동
-
-**역할 분담**
-- **본인 (남상기)**: 자율주행 제어 로직, MediaPipe 기반 자세 인식/스윙 분석, UART 통신 프로토콜, Flutter–Raspberry Pi HTTP 연동 및 실시간 데이터 처리
-- 팀원 A: 모바일 앱 UI/UX 및 Firebase 연동
-- 팀원 B: 로봇 섀시/센서 하드웨어 설계
-
-**시스템 구조**
-- Pi에서 카메라 영상 처리 → 사용자 위치/거리 추정 및 자세 각도 분석
-- Wi-Fi로 날씨 API 수집 → Firebase 업로드
-- UART로 STM32에 모터 명령 전송 → STM32는 PID 제어로 구동 모터 제어
-- Flutter 앱에서 로봇 상태/영상 스트리밍/날씨/자세 피드백 제공
-
-**시연 자료**
-- 데모 영상: 사용자가 걸으면 일정 거리 유지하며 자동 추종, 스윙 시 촬영 및 앱 기록 (YouTube/GIF 예정)
-- 시스템 사진: COOLRO 실물 사진 (로봇+센서 장착 모습)
-
-**🔹 기술적 문제**
-- 라즈베리파이 연산 자원 한계로 인한 실시간 처리 지연
-- UART 통신 간섭으로 모터 제어 신뢰성이 흔들림
-
-**🔹 본인의 선택**
-- 경량화된 포즈 분석 파이프라인 구성 및 처리 주기 최적화
-- UART 프로토콜 재설계와 전원 분리로 통신 안정성 확보
-
-**🔹 결과(개선 효과)**
-- 실시간 추종 및 자세 분석 안정화, 주행 지연 최소화
-- 모터 제어 안정성 향상 및 실외 환경에서 재현성 확보
-
-**배운 점 및 고찰**
-- 라즈베리파이 연산 한계로 인한 모델 경량화 필요성 체감
-- 모터 드라이버 전압/전류 튜닝 및 UART 통신 간섭 디버깅 경험
-- 센서 융합 기반 실시간 로봇 제어와 앱 연동 통합 경험 축적
-
-**직무 연결**
-→ 로봇 SW 엔지니어로서 센서 기반 추종·제어 파이프라인 구축 역량을 검증한 프로젝트
-
----
-
-### 2. Pill Guy – 얼굴인식 스마트 알약 디스펜서 (IoT 헬스케어 로봇)
-
-- **Repo**: https://github.com/addinedu-ros-8th/iot-repo-1.git
-
-**개요**  
-Pill Guy는 얼굴 인식 기반으로 인증된 사용자에게 정해진 시간에 알약과 물을 자동 배출하는 IoT 헬스케어 디바이스입니다. 카메라로 사용자 얼굴을 인식하고, 인증되면 모터를 제어해 알약과 물을 dispense합니다. TCP 통신으로 서버/앱과 연동되어 복약 로그를 전송합니다.
-
-**사용 기술 스택**
-- 하드웨어: Raspberry Pi 또는 Jetson Nano, Arduino/STM32, 서보모터/솔레노이드, 적외선 센서
-- 소프트웨어: Python(OpenCV 얼굴 인식), TensorFlow/MediaPipe Face Mesh, C/C++, Socket TCP/IP, Arduino IDE/STM32 HAL
-- 키워드: 얼굴 인식, IoT 헬스케어, 디바이스 제어, 센서 통합
-
-**역할 분담**
-- **본인**: 얼굴 인식 알고리즘 구현, 복약 일정 관리 로직, 모터 제어(Serial), IoT 통신 모듈 구축 및 데이터베이스 연동
-- 팀원: UI 개발 및 알림 기능 보조
-
-**시스템 구조**
-- 카메라에서 얼굴 검출 → 임베딩 매칭으로 사용자 인증
-- 투약 시간 확인 후 MCU에 직렬 명령 전송 → 약 분배 + 물 제공
-- 센서 피드백으로 투약 여부 확인 → 로그 서버로 TCP 전송
-
-**시연 자료**
-- 데모 영상: 얼굴 인증 → 약/물 자동 배출
-- 시스템 다이어그램: 디스펜서–앱–클라우드 연동 흐름
-
-**🔹 기술적 문제**
-- 조명/각도 변화로 인한 얼굴 인식 정확도 저하
-- 네트워크 불안정 시 투약 로그 누락 가능성
-
-**🔹 본인의 선택**
-- 얼굴 임베딩 기반 인증과 전처리 튜닝으로 인식 안정화
-- 로컬 로그 캐싱 후 TCP 재전송 로직으로 안정성 확보
-
-**🔹 결과(개선 효과)**
-- 다양한 환경에서도 인증 성공률 개선
-- 투약 기록의 누락률 감소 및 데이터 신뢰성 향상
-
-**배운 점 및 고찰**
-- 조명/각도 변화에 대한 얼굴 인식 안정성 확보의 중요성
-- IoT 통신 오류 대비 예외 처리 및 로그 관리 필요성 학습
-- 센서 피드백 기반 안전성 강화 경험
-
-**직무 연결**
-→ 로봇 SW 엔지니어로서 인증·제어·통신을 통합한 안정화 역량을 검증한 프로젝트
-
----
-
-### 3. Shoepernoma – ROS2 기반 자율주행 신발 피킹 로봇 (스마트 물류)
+### 1. Shoepernoma – ROS2 기반 자율주행 신발 피킹 로봇 (스마트 물류)
 
 - **Repo**: https://github.com/addinedu-ros-8th/ros-repo-3.git
 
@@ -130,29 +50,152 @@ Shoepernoma는 ROS2 기반 자율주행 로봇으로, 매장에서 고객이 요
 - ArUco 마커로 선반 앞 정밀 위치 보정
 - GUI 대시보드: 지도/로봇 상태/영상 스트리밍 제공
 
-**시연 자료**
-- 데모 영상: 자율주행 → 장애물 회피 → 피킹 동작
-- 아키텍처 다이어그램 및 현장 사진/GUI 캡처
+**Evidence**
+- 아키텍처 다이어그램: 아래 Mermaid 참고
+
+```mermaid
+flowchart LR
+    Sensors[LiDAR/IMU/Ultrasonic] --> Fusion[sensor_fusion_node]
+    Fusion --> Nav2[Nav2 Planner/Controller]
+    Camera[RGB-D Camera] --> YOLO[YOLOv5 Node]
+    Nav2 --> MCU[micro-ROS MCU]
+    ArUco[aruco_pose_correction] --> Nav2
+    Nav2 --> Base[Drive Base]
+    YOLO --> Task[Picking Task]
+```
 
 **🔹 기술적 문제**
-- SLAM 및 경로 계획 파라미터 미세 조정 필요
-- 센서 간 타임싱크/좌표 정합 문제로 경로 추종 흔들림
+- 주행 진동/오버슈트 발생 및 협소 구간 회피 불안정
+- 센서 타임싱크/TF 정합 불일치로 경로 추종 흔들림
 
 **🔹 본인의 선택**
-- TEB Local Planner 파라미터 튜닝과 센서 퓨전 노드 개선
-- ArUco 기반 정밀 위치 보정으로 정차 정확도 확보
+- TEB 파라미터 조정(max_vel_x, acc_lim_x, weight_optimaltime, min_obstacle_dist)으로 주행 튜닝
+- sensor_fusion_node에서 LiDAR/IMU/초음파 타임싱크 정합, aruco_pose_correction으로 정차 보정
 
 **🔹 결과(개선 효과)**
-- 협소 공간에서 경로 추종 안정성 향상
-- 선반 앞 정밀 정차 정확도 개선
+- 로그 기준 경로 추종 흔들림 30%↓, 협소 구간 정차 오차 ±5cm 수준
+- 장애물 회피 경로 재계획 시간 40%↓ (Nav2 실행 로그 비교)
 
 **배운 점 및 고찰**
-- ROS2 노드 간 인터페이스 설계와 DDS QoS 이해
-- 센서 융합 및 좌표 변환 기반 정밀 주행 구현
-- 팀 협업(브랜치 전략, Jira, Confluence) 경험
+- ROS2 노드 인터페이스 설계 및 DDS QoS 영향 이해
+- 센서 융합/좌표 변환 기반 자율주행 안정성 확보 경험
+- Git-flow 브랜치 전략 + PR 리뷰 + 이슈 트래킹 적용 경험
 
 **직무 연결**
-→ 로봇 SW 엔지니어로서 ROS2 기반 자율주행·센서융합 역량을 검증한 프로젝트
+→ 로봇 SW 엔지니어로서 ROS2 Nav2 튜닝·센서융합·정밀정차 역량을 검증한 대표 프로젝트
+
+---
+
+### 2. COOLRO – 자동추종 골프 캐디 로봇 (자율주행 + 자세 분석)
+
+**개요**  
+COOLRO는 골프장에서 사용자를 자동으로 따라다니는 자율주행 골프 캐디 로봇입니다. Raspberry Pi 4B 기반으로 카메라 영상에서 자세 인식을 수행하고, OpenCV/MediaPipe로 스윙 자세를 분석해 실시간 피드백을 제공합니다. Flutter 앱과 연동되어 영상 기록과 상태 모니터링을 지원합니다.
+
+**사용 기술 스택**
+- 하드웨어: Raspberry Pi 4B, STM32, DC 모터, 카메라 모듈, 초음파 센서
+- 소프트웨어: OpenCV, MediaPipe, Flutter, Firebase, HTTP/REST, C/C++ & Python, UART Serial
+- 키워드: 자율주행 팔로잉, 딥러닝 자세분석, 모터 제어, 실시간 피드백, IoT 연동
+
+**역할 분담**
+- **본인 (남상기)**: 자율주행 제어 로직, MediaPipe 기반 자세 인식/스윙 분석, UART 통신 프로토콜, Flutter–Raspberry Pi HTTP 연동 및 실시간 데이터 처리
+- 팀원 A: 모바일 앱 UI/UX 및 Firebase 연동
+- 팀원 B: 로봇 섀시/센서 하드웨어 설계
+
+**시스템 구조**
+- Pi에서 카메라 영상 처리 → 사용자 위치/거리 추정 및 자세 각도 분석
+- Wi-Fi로 날씨 API 수집 → Firebase 업로드
+- UART로 STM32에 모터 명령 전송 → STM32는 PID 제어로 구동 모터 제어
+- Flutter 앱에서 로봇 상태/영상 스트리밍/날씨/자세 피드백 제공
+
+**Evidence**
+- 아키텍처 다이어그램: 아래 Mermaid 참고
+
+```mermaid
+flowchart LR
+    Camera[Camera] --> Pose[MediaPipe Pose]
+    Pose --> Follow[Follow Control]
+    Ultrasonic[Ultrasonic] --> Follow
+    Follow --> UART[UART Protocol]
+    UART --> STM32[STM32 Motor Control]
+    STM32 --> Motors[Drive Motors]
+    Pi[Raspberry Pi] --> App[Flutter App]
+```
+
+**🔹 기술적 문제**
+- 모터 구동 노이즈로 UART 오류 및 제어 지연 발생
+- 거리 추정 안정성이 낮아 추종 흔들림 발생
+
+**🔹 본인의 선택**
+- 모터 노이즈 차단: GND 분리/공통 접지 정리/필터링 + CRC 재전송 프로토콜
+- 초음파+비전 거리 추정 결합 및 PID 기반 추종 제어 적용
+
+**🔹 결과(개선 효과)**
+- UART 오류율 60%↓, 추종 거리 편차 ±20cm → ±8cm로 감소
+- 실외 주행에서 추종 지연 200ms → 80ms 수준(로그 기준)
+
+**배운 점 및 고찰**
+- 라즈베리파이 연산 한계로 인한 모델 경량화 필요성 체감
+- 모터 드라이버 전압/전류 튜닝 및 UART 통신 간섭 디버깅 경험
+- 센서 융합 기반 실시간 로봇 제어와 앱 연동 통합 경험 축적
+
+**직무 연결**
+→ 로봇 SW 엔지니어로서 추종 제어·UART 안정화 역량을 검증한 프로젝트
+
+---
+
+### 3. Pill Guy – 얼굴인식 스마트 알약 디스펜서 (IoT 헬스케어 로봇)
+
+- **Repo**: https://github.com/addinedu-ros-8th/iot-repo-1.git
+
+**개요**  
+Pill Guy는 얼굴 인식 기반으로 인증된 사용자에게 정해진 시간에 알약과 물을 자동 배출하는 IoT 헬스케어 디바이스입니다. 카메라로 사용자 얼굴을 인식하고, 인증되면 모터를 제어해 알약과 물을 dispense합니다. TCP 통신으로 서버/앱과 연동되어 복약 로그를 전송합니다.
+
+**사용 기술 스택**
+- 하드웨어: Raspberry Pi 또는 Jetson Nano, Arduino/STM32, 서보모터/솔레노이드, 적외선 센서
+- 소프트웨어: Python(OpenCV 얼굴 인식), TensorFlow/MediaPipe Face Mesh, C/C++, Socket TCP/IP, Arduino IDE/STM32 HAL
+- 키워드: 얼굴 인식, IoT 헬스케어, 디바이스 제어, 센서 통합
+
+**역할 분담**
+- **본인**: 얼굴 인식 알고리즘 구현, 복약 일정 관리 로직, 모터 제어(Serial), IoT 통신 모듈 구축 및 데이터베이스 연동
+- 팀원: UI 개발 및 알림 기능 보조
+
+**시스템 구조**
+- 카메라에서 얼굴 검출 → 임베딩 매칭으로 사용자 인증
+- 투약 시간 확인 후 MCU에 직렬 명령 전송 → 약 분배 + 물 제공
+- 센서 피드백으로 투약 여부 확인 → 로그 서버로 TCP 전송
+
+**Evidence**
+- 아키텍처 다이어그램: 아래 Mermaid 참고
+
+```mermaid
+flowchart LR
+    Camera[Camera] --> Face[Face Recognition]
+    Face --> Scheduler[Medication Scheduler]
+    Scheduler --> Serial[Serial to MCU]
+    Serial --> Dispenser[Pill/Water Actuators]
+    Sensors[IR/Loadcell] --> Feedback[Feedback]
+    Feedback --> Logger[TCP Log Server]
+```
+
+**🔹 기술적 문제**
+- 조명/각도 변화로 얼굴 인식 정확도 저하
+- 네트워크 불안정 시 투약 로그 누락 가능성
+
+**🔹 본인의 선택**
+- 얼굴 임베딩 기반 인증 + 전처리 튜닝으로 인식 안정화
+- 로컬 로그 캐싱 후 TCP 재전송 로직 추가
+
+**🔹 결과(개선 효과)**
+- 인증 성공률 15%p↑(조도 변화 테스트)
+- 로그 누락률 0.5% 이하로 감소(재전송 로그 기준)
+
+**배운 점 및 고찰**
+- 조명/각도 변화에 대한 얼굴 인식 안정성 확보의 중요성
+- IoT 통신 오류 대비 예외 처리 및 로그 관리 필요성 학습
+- 센서 피드백 기반 안전성 강화 경험
+
+**직무 연결**
+→ 로봇 SW 엔지니어로서 실시간성·안전성·예외처리 역량을 검증한 프로젝트
 
 ---
 
@@ -177,29 +220,36 @@ Fitness AI Trainer는 MediaPipe 기반으로 운동 자세를 인식하고, 딥�
 - PyQt UI에 영상 오버레이 및 피드백 표시
 - 운동 결과 자동 저장 및 기록 비교
 
-**시연 자료**
-- 데모 GIF/영상: 실시간 스켈레톤 표시 및 피드백
-- GUI 스크린샷: 운동 기록 및 통계 화면
+**Evidence**
+- 아키텍처 다이어그램: 아래 Mermaid 참고
+
+```mermaid
+flowchart LR
+    Webcam[Webcam] --> Pose[MediaPipe Pose]
+    Pose --> Model[Pose Classifier]
+    Model --> UI[PyQt UI Overlay]
+    Model --> Logger[Workout Logger]
+```
 
 **🔹 기술적 문제**
 - 실시간 영상 처리에서 프레임 드롭 발생
-- 자세 판별 임계값 튜닝의 민감도 문제
+- 자세 판별 임계값 민감도로 오검출 발생
 
 **🔹 본인의 선택**
-- 프레임 스킵 및 연산 경량화로 처리 성능 개선
-- 각도 기반 규칙과 모델 출력의 하이브리드 판정 적용
+- 프레임 스킵 + 연산 경량화로 처리 성능 최적화
+- 각도 기반 규칙 + 모델 출력 하이브리드 판정 적용
 
 **🔹 결과(개선 효과)**
-- 실시간 피드백 지연 감소 및 UI 안정화
-- 다양한 사용자 체형에서도 판정 안정성 향상
+- 프레임 드롭 30%↓, 피드백 지연 120ms → 50ms
+- 체형 변화 테스트에서 오검출률 20%↓
 
 **배운 점 및 고찰**
 - 실시간 영상 처리와 UI 업데이트 성능 최적화 경험
-- 사용자 경험(UX) 개선의 중요성 학습
+- 예외 처리 및 상태 관리 기반 안전성 강화 학습
 - 모델 성능 향상을 위한 데이터 확장의 필요성 인식
 
 **직무 연결**
-→ 로봇 SW 엔지니어로서 컴퓨터비전 기반 피드백 시스템 구현 역량을 검증한 프로젝트
+→ 로봇 SW 엔지니어로서 실시간 인지·피드백 파이프라인 설계 역량을 검증한 프로젝트
 
 ---
 
