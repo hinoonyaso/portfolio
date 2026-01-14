@@ -8,8 +8,8 @@
 - 집계: 10회 평균/표준편차
 
 ### Baseline vs Tuned
-- Baseline: `config/teb/teb_profile_default.yaml` (commit TBD)
-- Tuned: `config/teb/teb_profile_narrow.yaml` (commit TBD)
+- Baseline: `config/teb/teb_profile_default.yaml` @ commit <hash>
+- Tuned: `config/teb/teb_profile_narrow.yaml` @ commit <hash>
 
 ### Results Table
 | Metric | Baseline | Tuned | Delta |
@@ -17,6 +17,15 @@
 | Path tracking oscillation (RMS) | TBD | TBD | TBD |
 | Replan time (avg) | TBD | TBD | TBD |
 | Stop accuracy (cm) | TBD | TBD | TBD |
+
+### Top5 Tuning Params (TEB)
+| Param | Change | Effect |
+| --- | --- | --- |
+| max_vel_x | TBD | 속도 상한 안정화 |
+| acc_lim_x | TBD | 가속 제어 안정화 |
+| weight_optimaltime | TBD | 시간 최적화 가중 |
+| min_obstacle_dist | TBD | 안전 거리 확보 |
+| weight_obstacle | TBD | 장애물 회피 강화 |
 
 ### Evidence
 - rosout 캡처: (링크/파일명)
@@ -26,11 +35,20 @@
 - 핵심 프레임 표: map/odom/base_link/laser/imu
 
 ### Reproduce
-1. rosbag play <bag_path>
-2. ros2 launch roscar_nav bringup.launch.py
-3. ros2 param set /controller_server FollowPath.<param> <value>
-4. ros2 service call /compute_path_to_pose nav2_msgs/srv/ComputePathToPose
-5. 결과 로그 수집: rosout + topic echo
+1. ros2 launch roscar_nav bringup.launch.py
+2. rosbag play <bag_path> --clock
+3. python tools/eval_cte.py --bag <bag_path>
+4. python tools/eval_replan.py --log <rosout_log>
+5. outputs/*.csv → plots/*.png
+
+### TF Frame Table
+| Frame | Parent | Source | Note |
+| --- | --- | --- | --- |
+| map | — | SLAM | global |
+| odom | map | nav2 | local drift |
+| base_link | odom | wheel/imu | robot body |
+| laser | base_link | static tf | LiDAR |
+| camera_link | base_link | static tf | RGB-D |
 
 ## COOLRO Metrics
 ### Definitions
@@ -51,7 +69,7 @@
 
 ### Evidence
 - UART 로그 캡처: (링크/파일명)
-- UART 프로토콜 스펙: timeout=30ms, retry=3
+- UART 프로토콜 스펙:\n  - baud: 115200 / frame: STX | cmd | payload | CRC16 | ETX\n  - timeout: 30ms / retry: 3 / ack: OK/ERR\n  - error handling: CRC fail → resend, timeout → safe stop
 
 ## Pill Guy Metrics
 ### Definitions
