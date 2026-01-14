@@ -1,8 +1,6 @@
 # 🤖 Robot Software & Embedded Portfolio - 남상기
 
-“ROS2 기반 자율주행과 임베디드 제어를 실제 환경에서 구현해본 로봇 SW 엔지니어”
-
-Nav2 튜닝 · 센서퓨전 · MCU 통신 안정화를 핵심 강점으로 합니다.
+“ROS2 Nav2 튜닝·센서퓨전·MCU 통신 안정화 경험 기반 로봇 SW 엔지니어”
 
 > **Robot Software Engineer | 자율주행 · 센서융합 · AI 비전 · 임베디드 제어**
 
@@ -17,7 +15,11 @@ Nav2 튜닝 · 센서퓨전 · MCU 통신 안정화를 핵심 강점으로 합�
 
 ## 🧾 Evidence (Quick Links)
 - [Shoepernoma Diagram](#shoepernoma--ros2-기반-자율주행-신발-피킹-로봇-스마트-물류)
+- [Shoepernoma Demo](docs/demo.md#shoepernoma-demo)
+- [Shoepernoma Metrics/Logs](docs/metrics.md#shoepernoma-metrics)
 - [COOLRO Diagram](#coolro--자동추종-골프-캐디-로봇-자율주행--자세-분석)
+- [COOLRO Demo](docs/demo.md#coolro-demo)
+- [COOLRO Metrics/Logs](docs/metrics.md#coolro-metrics)
 - [Pill Guy Diagram](#pill-guy--얼굴인식-스마트-알약-디스펜서-iot-헬스케어-로봇)
 - [Fitness AI Trainer Diagram](#fitness-ai-trainer--딥러닝-자세-인식-기반-홈-피트니스-트레이너)
 - [Shoepernoma Repo](https://github.com/addinedu-ros-8th/ros-repo-3.git)
@@ -25,7 +27,7 @@ Nav2 튜닝 · 센서퓨전 · MCU 통신 안정화를 핵심 강점으로 합�
 - [Fitness AI Trainer Repo](https://github.com/addinedu-ros-8th/deeplearning-repo-1.git)
 
 ## 🧰 Tech Stack Snapshot
-ROS2 / Nav2 / TF2 / OpenCV / MediaPipe / MCU(UART) / TCP / PyQt / Flutter
+ROS2 / Nav2(TEB) / TF2 / OpenCV / MCU(UART) / TCP / PyQt (+ MediaPipe, Flutter는 프로젝트별 사용)
 
 ## 🧩 Projects
 
@@ -80,9 +82,10 @@ flowchart LR
   - aruco_pose_correction으로 정차 보정 트리거
 
 **🔹 결과(개선 효과)**
-- 로그 기준 경로 추종 흔들림 30%↓, 협소 구간 정차 오차 ±5cm 수준
-- 장애물 회피 경로 재계획 시간 40%↓ (Nav2 실행 로그 비교)
-  - 측정 기준: rosout 로그 + bag replay 기반, 동일 경로 3m × 10회 평균
+- **로그 기준 경로 추종 흔들림 30%↓ (기본 파라미터 대비)**
+- **장애물 회피 경로 재계획 시간 40%↓ (튜닝 전 대비)**
+  - 정차 오차 ±5cm 수준(동일 경로 3m × 10회 평균)
+  - 측정 기준: rosout 로그 + bag replay
   - 테스트 조건: 복도 폭 120cm, 장애물 3개, 속도 제한 0.4m/s
 
 **What I Built (Owner Scope)**
@@ -146,8 +149,9 @@ flowchart LR
 - 초음파+비전 거리 추정 결합 및 PID 기반 추종 제어
 
 **🔹 결과(개선 효과)**
-- UART 오류율 60%↓, 추종 거리 편차 ±20cm → ±8cm로 감소
-- 실외 주행에서 추종 지연 200ms → 80ms 수준(로그 기준)
+- **UART 오류율 60%↓ (필터링/CRC 적용 전 대비)**
+- **추종 거리 편차 ±20cm → ±8cm (PID/센서 융합 적용 후)**
+  - 실외 주행 추종 지연 200ms → 80ms 수준(로그 기준)
   - 측정 기준: 동일 루트 20m × 8회 평균, UART 오류 로그 집계
   - 테스트 조건: 인원 1명, 평균 보행 1.0m/s
 
@@ -275,29 +279,10 @@ flowchart LR
 
 ---
 
-## 🧭 기획 프로젝트 (축약)
-
-**개요**
-- 센서 조합 최적화 기반 자율주행 서비스 로봇 기획
+## 🧭 Concepts & System Design Notes
+- 센서 조합 최적화 기반 자율주행 서비스 로봇 설계
 - 이동로봇+로봇팔 통합 시나리오 및 음성 인터페이스 아이디어
-- AR/원격 제어 등 확장 콘셉트 브레인스토밍
-
-**🔹 기술적 문제**
-- 제한된 예산 내에서 센서 성능/비용 균형 확보 필요
-
-**🔹 본인의 선택**
-- SLAM/경로계획/객체인식 파이프라인을 기준으로 센서 우선순위 설계
-
-**🔹 결과(개선 효과)**
-- 구현 전 단계에서 요구사항과 리스크를 체계적으로 정리
-
-**배운 점 및 고찰**
-- 요구분석 및 시스템 설계 단계의 중요성 체감
-- 비용 대비 성능 고려 및 기술 조합 설계 경험
-- 구현 전 단계에서의 리스크 분석 역량 강화
-
-**직무 연결**
-→ 로봇 SW 엔지니어로서 시스템 설계·요구분석 역량을 검증한 기획 경험
+- 구현 전 리스크(센서 인터페이스/비용/성능) 분석 기록
 
 ---
 
