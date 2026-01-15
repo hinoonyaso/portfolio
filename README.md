@@ -93,6 +93,7 @@ flowchart LR
 - A: 로그 기반 비교로 profile 분리 기준을 팀 표준으로 정립
 - R: 케이스별 profile 분리 후 튜닝 논쟁이 실험 로그 기준으로 표준화됨
 
+https://github.com/addinedu-ros-8th/ros-repo-3.git
 ---
 
 ### 2. COOLRO – 자동추종 골프 캐디 로봇 (자율주행 + 자세 분석)
@@ -182,6 +183,7 @@ flowchart LR
 **직무 연결**
 → 로봇 SW 엔지니어로서 **실시간성·안전성·예외처리 역량**을 검증한 프로젝트
 
+https://github.com/addinedu-ros-8th/iot-repo-1.git
 ---
 
 ### 4. Fitness AI Trainer – 딥러닝 자세 인식 기반 홈 피트니스 트레이너 (Edge AI 최적화)
@@ -229,6 +231,7 @@ flowchart LR
 **직무 연결**
 → 로봇 SW 엔지니어로서 **실시간 인지·피드백 파이프라인 최적화 역량**을 검증한 프로젝트
 
+https://github.com/addinedu-ros-8th/deeplearning-repo-1.git
 ---
 
 ## 🧭 Concepts & System Design Notes
