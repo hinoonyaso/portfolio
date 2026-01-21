@@ -287,6 +287,7 @@ flowchart LR
 **Portfolio Summary**
 - 현장 통신 안정화 + 추종 제어 품질을 동시에 개선한 프로젝트
 
+https://github.com/hinoonyaso/coolro.git
 ---
 
 ### 3. Pill Guy – 얼굴인식 스마트 알약 디스펜서 (임베디드 제어·예외처리 중심)
@@ -621,6 +622,8 @@ ros2 launch arm_gazebo bringup_all.launch.py enable_task:=true enable_perception
 - ArUco/Depth 기반 target pose 자동 추정
 - Nav2 연계 모바일 매니퓰레이터 확장
 
+https://github.com/hinoonyaso/robot_arm_project.git
+---
 ## 🧭 Concepts & System Design Notes
 Shoepernoma에서 확장된 설계 사고를 정리한 요약입니다.  
 - 문서: [docs/design_notes.md](docs/design_notes.md)
