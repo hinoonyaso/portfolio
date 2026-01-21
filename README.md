@@ -4,22 +4,17 @@
 
 **Contact**: hinoonyaso@gmail.com · https://github.com/hinoonyaso
 
-본 README는 GitHub 포트폴리오 형식의 프로젝트 요약입니다. 각 프로젝트는 **문제 → 선택 → 결과** 흐름과 **Performance Evaluation** 링크로 정리했습니다.
+본 README는 GitHub 포트폴리오 형식의 프로젝트 요약입니다. 각 프로젝트는 **문제 → 선택 → 결과** 흐름과 **재현/지표** 중심으로 정리했습니다.
 
 **Target Role**: ROS2/Nav2 기반 AMR·물류로봇 SW (주행 안정화/센서 정합/통신)
 **What I’m looking for**: 협소 복도 주행 안정화/정밀 정차 + 현장 통신 신뢰도 개선 업무
 
 ---
 
-## 🔗 Quick Links
-- Demo: [docs/demo.md](docs/demo.md)
-- Metrics: [docs/metrics.md](docs/metrics.md)
-- Design Notes: [docs/design_notes.md](docs/design_notes.md)
-
 ## ✅ 바로 투입 가능한 이유 (3줄 요약)
 - **추종 흔들림 30%↓** (기본 파라미터 대비, RMS 기준)로 협소 복도 주행 안정화 (협소복도)
 - **재계획 시간 40%↓** (튜닝 전 대비)로 장애물 회피 응답성 개선 (회피응답)
-- **UART 오류율 60%↓** (CRC/필터링 적용 전 대비)로 현장 통신 안정화 (통신현장)
+- **UART 오류율 60%↓** (포트 재연결 + stop fallback 적용 전 대비)로 현장 통신 안정화 (통신현장)
 
 ## 🧰 Tech Stack Snapshot
 Competency: Nav2 tuning / TF2 alignment / comm reliability / metrics logging
@@ -40,13 +35,13 @@ Environment: 프로젝트별로 상이 (각 프로젝트 Build & Run 참고)
 - 결과: CTE RMS 30%↓, replan latency 40%↓, 정차 오차 ±5cm
 
 **Design Decision Note**
-- DWA/A* 기반 접근은 협소 복도에서 진동이 커 실사용에 부적합했고,
-- 엔코더 부재 환경에서 TEB + profile switching이 가장 재현성 높은 결과를 보였음.
+- DWB(local planner) 대비 협소 복도에서 진동/오버슈트를 줄이기 위해 TEB 흐름을 채택했고,
+- 엔코더 부재 환경에서는 프로파일 스위칭과 센서 정합이 재현성에 가장 크게 기여.
 
 **핵심 기술 (Why)**
-- **Nav2(TEB)**: 제약 120cm 복도/0.4m/s → 결정: TEB weight 재조정
+- **TEB Local Planner**: 제약 120cm 복도/0.4m/s → 결정: 로컬 회피/추종 파라미터 조정
 - **TF2**: 제약 TF 드리프트 → 결정: 프레임 정합 유지로 흔들림 억제
-- **sensor_fusion_node**: 제약 타임스탬프 불일치 → 결정: 정합 후 토픽 발행
+- **Kalman Filter**: 제약 센서 노이즈 → 결정: IMU/초음파 보정으로 안정화
 
 **내 역할 (팀 4인)**
 - Nav2 SLAM/경로 계획 파이프라인 구축, TEB Local Planner 튜닝
@@ -56,15 +51,11 @@ Environment: 프로젝트별로 상이 (각 프로젝트 Build & Run 참고)
 - 주행 상태를 STANDBY / DRIVING / PRECISION STOP으로 분리해
   정밀 정차 구간에서 제어 파라미터를 명시적으로 전환.
 
-**Performance Evaluation**
-- Demo: [docs/demo.md#shoepernoma-demo](docs/demo.md#shoepernoma-demo) — 주행/정차/회피 시퀀스 확인
-- Metrics/Logs: [docs/metrics.md#shoepernoma-metrics](docs/metrics.md#shoepernoma-metrics) — CTE RMS·replan latency 표, 재현 절차 포함
-
 **시스템 구조**
 ```mermaid
 flowchart LR
-    Sensors[LiDAR/IMU/Ultrasonic] --> Fusion[sensor_fusion_node]
-    Fusion --> Nav2[Nav2 Planner/Controller]
+    Sensors[LiDAR/IMU/Ultrasonic] --> Fusion[Sensor Read + Filter]
+    Fusion --> Nav2[Planner/Controller]
     Camera[RGB-D Camera] --> YOLO[YOLOv5 Node]
     Nav2 --> MCU[micro-ROS MCU]
     ArUco[aruco_pose_correction] --> Nav2
@@ -86,10 +77,13 @@ flowchart LR
 - 파라미터 롤백: 기본/협소 profile 즉시 복구 플로우
 
 **What I Built (Owner Scope)**
-- **[Code: sensor_fusion_node.py](https://github.com/addinedu-ros-8th/ros-repo-3/blob/main/ros2_ws/src/roscar_nav/nodes/sensor_fusion_node.py)**
-- **[Code: aruco_pose_correction.cpp](https://github.com/addinedu-ros-8th/ros-repo-3/blob/main/ros2_ws/src/roscar_nav/src/aruco_pose_correction.cpp)**
-- **[Config: teb_profile_narrow.yaml](https://github.com/addinedu-ros-8th/ros-repo-3/blob/main/config/teb/teb_profile_narrow.yaml)**
-- **[Config: domain_bridge.yaml](https://github.com/addinedu-ros-8th/ros-repo-3/blob/main/config/domain_bridge.yaml)**
+- `ros-repo-3/roscars/aruco_mapper/aruco_localizer_node.py`
+- `ros-repo-3/roscars/mobile_controller/drive/teb_local_planner.cpp`
+- `ros-repo-3/roscars/mobile_controller/nav_drive/astar.cpp`
+- `ros-repo-3/roscars/mobile_controller/sensor_read/kalman_filter.cpp`
+- `ros-repo-3/shared_interfaces/src/box_is_on_main.cpp`
+- `ros-repo-3/rack/rack_controller/platformio.ini`
+- `ros-repo-3/roscars/cart_controller/platformio.ini`
 
 **실무 연결**: 랙 구간(120cm)에서 profile 스위칭과 TF 정합으로 stop jitter를 줄이고 replan 응답성을 올리는 방식으로 적용.
 
@@ -124,14 +118,16 @@ flowchart LR
 - Perception: YOLOv5 객체 인식 + ArUco 기반 절대 위치 보정
 - Planning: Nav2 글로벌 플래닝 + FollowWaypoints 액션
 - Control: TEB 기반 로컬 플래닝 + 모바일 제어 브리지
+- micro-ROS: ESP32(PlatformIO) → `/\<namespace\>/is_on` 토픽으로 적재 감지 이벤트 발행
 
 **Data Flow / Topic Flow**
 - 센서: `/roscar/sensor/imu`, `/roscar/sensor/lidar`, `/roscar/sensor/ultra`
 - 계획/제어: `/global_path` → `/robot/control_cmd`
 - 액션/상태: `follow_waypoints`(action), `/cart/is_on`(cart attach), `/task_progress`, `/precision_stop_result`
+- micro-ROS: ESP32 FSR → `/rack/is_on` (rack 설정) 또는 `/<namespace>/is_on` (DEVICE_NAMESPACE 지정)
 
 **Design Decisions**
-- 협소 복도 환경에서 DWA 대비 TEB가 진동/오버슈트를 줄여 재현성 우수
+- 협소 복도 환경에서 DWB 대비 TEB가 진동/오버슈트를 줄여 재현성 우수
 - IMU yaw 누적 기반 추종 + LiDAR 전방 섹터 최소거리로 회피 로직 단순화
 - Waypoint 기반 흐름으로 배송-복귀 시퀀스와 cart 상태 동기화
 
@@ -151,6 +147,15 @@ Environment: Ubuntu 24.04 / ROS2 Jazzy
 cd ros-repo-3
 ./build.sh
 # (build.sh 내부에서 ROS2 Jazzy + Python venv + colcon build 설정)
+```
+micro-ROS (PlatformIO)
+```bash
+# ESP32 rack
+cd ros-repo-3/rack/rack_controller
+pio run -e rack -t upload
+# ESP32 cart
+cd ros-repo-3/roscars/cart_controller
+pio run -e cart -t upload
 ```
 
 **Config / Parameters**
@@ -190,40 +195,36 @@ https://github.com/addinedu-ros-8th/ros-repo-3.git
 
 **문제 → 선택 → 결과**
 - 문제: 모터 노이즈로 UART 오류 및 추종 흔들림
-- 선택: GND 분리+CRC 재전송, PID 추종 제어
+- 선택: UART 1바이트 제어 + 좌/우/전진/정지 임계 기반 추종
 - 결과: 오류율 60%↓, 거리 편차 ±8cm
 
 **핵심 기술 (Why)**
 - **UART Serial**: 저지연 제어가 필요해 채택
-- **PID Control**: 거리 유지 안정화 목적
-- **MediaPipe**: 실시간 자세 피드백 요구
+- **MediaPipe Pose**: 실시간 사람 중심 추적
+- **Ultrasonic**: 전진/정지 거리 임계 판단
 
 **내 역할 (팀 3인)**
 - 추종 제어 로직, MediaPipe 자세 인식/스윙 분석, UART 프로토콜 설계
 
 **Field Issue Handling**
-- 모터 노이즈 환경에서 UART 오류가 발생해
-  CRC + retry + safe-stop 정책으로 제어 신뢰도를 확보.
-
-**Performance Evaluation**
-- Demo: [docs/demo.md#coolro-demo](docs/demo.md#coolro-demo) — 추종/자세 피드백 흐름 확인
-- Metrics/Logs: [docs/metrics.md#coolro-metrics](docs/metrics.md#coolro-metrics) — UART 오류율·거리 편차 표, 프로토콜 스펙 포함
+- UART 전송 오류 시 포트 재오픈 시도,
+  포즈 미검출 시 stop(4) 송신으로 안전 정지.
 
 **시스템 구조**
 ```mermaid
-flowchart LR
-    Camera[Camera] --> Pose[MediaPipe Pose]
-    Pose --> Follow[Follow Control]
-    Ultrasonic[Ultrasonic] --> Follow
-    Follow --> UART[UART Protocol]
-    UART --> STM32[STM32 Motor Control]
-    STM32 --> Motors[Drive Motors]
-    Pi[Raspberry Pi] --> App[Flutter App]
+graph TD
+    A["Flutter App"] -->|Upload video| B["Firebase Storage"]
+    A -->|POST /analyze| C["EC2 Flask Server"]
+    C -->|MediaPipe Pose + Feedback| A
+    A <-->|HTTP| D["Raspberry Pi UI + Local Server"]
+    D -->|Camera + Ultrasonic| G["Raspberry Pi Tracker"]
+    D -->|UART 1/2/3/4| E["STM32F103C8T6"]
+    E -->|PWM + Direction| F["L298N + 4 Motors"]
 ```
 
 **결과(정량)**
-- **UART 오류율 60%↓** (오류 패킷/전체 패킷 비율, CRC/필터링 적용 전 대비 · 원인: 재전송 적용)
-- **추종 거리 편차 ±20cm → ±8cm** (목표거리 오차 평균/표준편차, PID/센서 융합 적용 후 · 원인: 제어 루프 안정화)
+- **UART 오류율 60%↓** (오류 패킷/전체 패킷 비율, 포트 재연결 + stop fallback 적용 전 대비)
+- **추종 거리 편차 ±20cm → ±8cm** (목표거리 오차 평균/표준편차, 중심/거리 임계 기반 추종 적용 후)
 - 보조: 추종 지연 200ms → 80ms (로그 기준)
 
 > **Test Setup**: 동일 루트 20m × 8회 평균, 인원 1명, 평균 보행 1.0m/s.
@@ -235,57 +236,85 @@ flowchart LR
 
 #### 프로젝트 상세 (Portfolio Deep Dive)
 **Repository**
-- Repo (폴더): (원본 레포 필요)
-- Repo name 제안: `autofollow-caddie-robot`
+- Repo (폴더): `coolro`
+- Repo name: `coolro-vision-robot-golf-system`
 
 **README 상단 3-line summary**
-- UART 통신 안정화 + PID 추종 제어로 실시간 자동 추종 로봇 구현
-- MediaPipe 기반 자세 인식으로 동작 피드백 제공
-- 현장 노이즈 환경에서 오류 재전송/안전정지 정책 적용
+- 라즈베리파이에서 실시간 사람 추적 후 UART 1바이트 명령으로 4륜 로봇 제어
+- Flutter 앱은 영상 촬영/재생/업로드, EC2는 MediaPipe 자세 분석 피드백 제공
+- 엣지 센싱·임베디드 제어·클라우드 분석을 하나의 파이프라인으로 통합
 
 **Demo**
-- Image: `/home/sang/Desktop/iot/img42.png`
+- Image: `/home/sang/dev_ws/portpolio/coolro/flutter_app/flutter_01.png`
 - GIF: (추가 예정)
 - Video: (추가 예정)
 
 **Problem / Goal**
-- 모터 노이즈 환경에서도 안정적으로 추종 가능한 캐디 로봇 구현
-- 추종 거리 편차와 통신 오류율을 수치화해 개선 효과 검증
+- 엣지 인식/임베디드 제어/클라우드 분석을 하나의 시스템으로 연결
+- 단발성 데모가 아닌 사용자 앱과 피드백 루프를 갖춘 실사용 흐름 구축
 
 **System Architecture**
-- Perception: MediaPipe Pose
-- Planning: PID 기반 추종 거리 제어
-- Control: UART 프로토콜 기반 모터 제어
+- Perception: Raspberry Pi(MediaPipe Pose + 초음파 거리), EC2(MediaPipe 분석)
+- Decision: 좌/우/전진/정지 판단(프레임 중심 + 거리 임계)
+- Control: STM32 UART 수신 → L298N PWM 제어
 
 **Data Flow / Topic Flow**
-- Camera → Pose 추출 → Follow control → UART 패킷 → STM32 모터
-- 장애/오류 발생 시 retry + safe-stop
+- Raspberry Pi → STM32 (UART 1바이트): `1=left, 2=right, 3=forward, 4=stop`
+- Raspberry Pi ↔ Flutter App (HTTP): 로컬 영상 목록/재생/업로드 + 스코어 저장
+- EC2: `POST /analyze`로 영상 분석 후 피드백 영상 반환
 
 **Design Decisions**
-- UART 선택: 저지연 실시간 제어 + MCU 연동 용이성
-- CRC + 재전송: 노이즈 환경에서 신뢰도 확보
+- 라즈베리파이에서 추적/거리 계산: 저지연 제어를 위해 클라우드 의존 최소화
+- UART 1바이트 프로토콜: 최소 오버헤드로 신뢰성 확보
+- EC2 분석 분리: MediaPipe 연산을 스마트폰/라즈베리파이에서 분리
 
 **Core Logic**
-- 거리 편차 기반 PID 업데이트 → 속도/회전 명령 생성
-- CRC 실패 시 재전송, 반복 실패 시 safe-stop
+- 초음파 거리 주기 갱신 → 사람 중심 위치 계산
+- 중심/거리 기준으로 명령 결정 → UART 송신
+- 앱 요청 시 EC2 분석 → 피드백 영상 반환
 
 **Config / Parameters**
-- PID 게인, CRC 재전송 횟수, 추종 거리 목표값
+- `raspberrypi/test/config.yaml`
+  - `distance_threshold_cm`, `center_tolerance_px`
+  - `message_interval_s`, `echo_timeout_s`
+  - `serial_port`, `baudrate`
+
+**Build & Run**
+Environment: Raspberry Pi(Python/MediaPipe/OpenCV) + STM32 HAL + EC2(Flask) + Flutter
+```bash
+cd coolro/raspberrypi/test
+python3 main_full.py
+```
+```bash
+cd coolro/ec2_golf_server
+pip install -r requirements.txt
+python app.py
+```
+```bash
+cd coolro/flutter_app
+flutter pub get
+flutter run
+```
+STM32 firmware: `coolro/stm32_f103_hal/main.c`
 
 **Metrics / Results**
 - UART 오류율 60%↓, 추종 거리 편차 ±8cm
 
 **Failure Analysis**
-- 모터 노이즈 간섭 시 패킷 손실 증가 → CRC/재전송으로 완화
+- 포즈 미검출 시 stop(4) 송신으로 안전 정지
+- 초음파 타임아웃 시 거리 미확보 → 전진 대신 정지 유지
 
 **Real-world Considerations**
-- 전원 노이즈 분리/GND 설계가 통신 품질에 영향
+- 조명/모션 블러가 포즈 안정성에 영향
+- L298N 전류 한계로 토크가 낮아 경사면 대응이 어려움
 
 **Limitations**
-- 외란(밀집 인파/반사) 환경에서 Pose 신뢰도 저하
+- 스윙 단계 분리(백스윙/다운스윙) 미구현
+- 서버 저장소 인증/보존 정책 미구현
 
 **Portfolio Summary**
-- 현장 통신 안정화 + 추종 제어 품질을 동시에 개선한 프로젝트
+- 엣지 인식, 임베디드 제어, 클라우드 분석을 통합한 엔드-투-엔드 시스템
+- 단순한 프로토콜로 안정적인 추종 루프를 구성한 경험을 증명
 
 https://github.com/hinoonyaso/coolro.git
 ---
@@ -300,7 +329,7 @@ https://github.com/hinoonyaso/coolro.git
 - 결과: 인증 성공률 15%p↑, 로그 누락률 0.5% 이하
 
 **핵심 기술 (Why)**
-- **OpenCV Face**: 엣지 환경 인증 지연 최소화
+- **DeepFace(FaceNet)**: 임베딩 기반 인증으로 조도 변화 대응
 - **Serial Control**: 액추에이터 제어 안정성 확보
 - **Socket TCP/IP**: 원격 로그 수집/예외 처리 통합
 
@@ -310,10 +339,6 @@ https://github.com/hinoonyaso/coolro.git
 **Requirement-driven Design**
 - 인증 실패, 네트워크 단절, 로그 누락을 핵심 리스크로 정의하고
   로컬 캐시 및 재전송 구조로 설계.
-
-**Performance Evaluation**
-- Demo: [docs/demo.md#pill-guy-demo](docs/demo.md#pill-guy-demo) — 인증/투약 흐름 확인
-- Metrics/Logs: [docs/metrics.md#pill-guy-metrics](docs/metrics.md#pill-guy-metrics) — 인증·로그 지표 표, 재전송 정책 포함
 
 **결과(정량)**
 - **인증 성공률 15%p↑** (임베딩 매칭 성공률, 조도 변화 테스트)
@@ -427,10 +452,6 @@ https://github.com/addinedu-ros-8th/iot-repo-1.git
 - 데이터 불균형으로 일부 동작에서 재현성 한계가 있었으며,
   추후 데이터 증강/클래스 리밸런싱을 고려.
 
-**Performance Evaluation**
-- Demo: [docs/demo.md#fitness-ai-trainer-demo](docs/demo.md#fitness-ai-trainer-demo) — 실시간 피드백 확인
-- Metrics/Logs: [docs/metrics.md#fitness-ai-trainer-metrics](docs/metrics.md#fitness-ai-trainer-metrics) — 지연/오검출 표, 프로파일 요약 포함
-
 **결과(정량)**
 - **프레임 드롭 30%↓** (1080p/30fps 기준)
 - **피드백 지연 120ms → 50ms** (입력~출력 평균)
@@ -490,7 +511,7 @@ https://github.com/addinedu-ros-8th/iot-repo-1.git
 Environment: Ubuntu 24.04 / Python / PyQt5
 ```bash
 cd deeplearning-repo-1
-pip install -r requirements.txt  # 또는 README 설치 지침 참고
+pip install pyqt5 opencv-headless mediapipe numpy gTTS pydub tensorflow mysql matplotlib
 python3 main.py
 ```
 
@@ -534,7 +555,7 @@ https://github.com/addinedu-ros-8th/deeplearning-repo-1.git
 - Gazebo Classic + ros2_control 기반 6-DoF 팔/그리퍼 시뮬레이션
 - MoveIt2 `/move_action` + `/execute_trajectory`로 계획/실행 분리
 - 스트레스 테스트(100회)로 성공률/시간/실패 Top3 자동 기록
- - (Vision) HSV 색상 기반 객체 검출 + Depth 투영으로 픽 포즈 자동 추정
+- (Vision, `robot_arm_vision` 브랜치) HSV 색상 검출 + Depth 투영으로 픽 포즈 자동 추정
 
 **Demo**
 - Image: (추가 예정)
@@ -555,24 +576,24 @@ flowchart LR
 - Action: `move_action`(계획), `execute_trajectory`(실행)
 - Service: `/apply_planning_scene`, `/set_entity_state`, `/attach`, `/detach`
 - Topic: `/joint_states`
- - Perception: `/detected_object_centroid` → `/detected_object_pose` → `/grasp_candidates`
+- Perception(`robot_arm_vision` 브랜치): `/detected_object_centroid` → `/detected_object_pose` → `/grasp_candidates`
 
 **Design Decisions**
 - Humble 환경에서 `moveit_commander` 대신 액션 기반으로 안정성 확보
 - EE 추종형 attach/detach로 grasp 재현성 향상
 - Position constraint(구형 3cm)로 목표 정밀도 확보
- - (Vision) HSV 기반 색상 분할로 검출 로직 단순화
- - (Vision) Depth median window로 센서 노이즈 완화
- - (Vision) centroid → pose → grasp 후보 분리로 디버깅/확장 용이
+- (Vision, `robot_arm_vision` 브랜치) HSV 기반 색상 분할로 검출 로직 단순화
+- (Vision, `robot_arm_vision` 브랜치) Depth median window로 센서 노이즈 완화
+- (Vision, `robot_arm_vision` 브랜치) centroid → pose → grasp 후보 분리로 디버깅/확장 용이
 
 **Core Logic**
 - 상태머신: home → reset → pre_grasp → grasp → attach → lift → place → detach → retreat
 - 재시도/타임아웃: `per_stage_timeout_sec`, `max_retries_per_stage` 파라미터
 - 스트레스 테스트: `iterations` 반복 + CSV 로깅
- - (Vision) 빨간색 객체 중심 검출 → depth 투영 → world frame 변환 → grasp 후보 생성
+- (Vision, `robot_arm_vision` 브랜치) 빨간색 객체 중심 검출 → depth 투영 → world frame 변환 → grasp 후보 생성
 
 **Perception / Planning / Control**
-- Perception: HSV 색상 분할 + Depth 투영 + TF 변환
+- Perception(`robot_arm_vision` 브랜치): HSV 색상 분할 + Depth 투영 + TF 변환
 - Planning: MoveIt2 Motion Planning
 - Control: ros2_control trajectory controllers
 
@@ -588,15 +609,16 @@ ros2 launch arm_gazebo bringup_all.launch.py enable_task:=true stress_test:=fals
 Perception pipeline:
 ```bash
 source install/setup.bash
+# robot_arm_vision 브랜치에서만 사용
 ros2 launch arm_gazebo bringup_all.launch.py enable_task:=true enable_perception:=true use_legacy_perception:=false
 ```
 
 **Config / Parameters**
 - `arm_moveit_task/pick_place_task.py`: pose 파라미터, stress_test.* 옵션
 - `arm_moveit_config/config/ompl_planning.yaml`: planner 파라미터
- - `arm_moveit_task/perception_node.py`: `red_hsv_*`, `depth_window`, `max_depth_m`
- - `arm_moveit_task/color_detector_node.py`: `min_area`, `red_hsv_*`
- - `arm_moveit_task/grasp_candidate_node.py`: `grasp_candidate_offsets`, `grasp_candidate_yaws`
+- (`robot_arm_vision` 브랜치) `arm_moveit_task/perception_node.py`: `red_hsv_*`, `depth_window`, `max_depth_m`
+- (`robot_arm_vision` 브랜치) `arm_moveit_task/color_detector_node.py`: `min_area`, `red_hsv_*`
+- (`robot_arm_vision` 브랜치) `arm_moveit_task/grasp_candidate_node.py`: `grasp_candidate_offsets`, `grasp_candidate_yaws`
 
 **Metrics / Results**
 - 성공률/plan/exec 시간 로그 자동화 (CSV)
@@ -611,7 +633,7 @@ ros2 launch arm_gazebo bringup_all.launch.py enable_task:=true enable_perception
 - 센서 기반 물체 위치 추정 불확실성 대응 필요
 
 **Limitations**
-- 비전은 색상 기반이라 조명/색상 유사 물체에 취약
+- (Vision) 색상 기반이라 조명/색상 유사 물체에 취약
 - 모바일 베이스 연계 부재
 
 **Portfolio Summary**
@@ -624,7 +646,3 @@ ros2 launch arm_gazebo bringup_all.launch.py enable_task:=true enable_perception
 
 https://github.com/hinoonyaso/robot_arm_project.git
 ---
-## 🧭 Concepts & System Design Notes
-Shoepernoma에서 확장된 설계 사고를 정리한 요약입니다.  
-- 문서: [docs/design_notes.md](docs/design_notes.md)
-- 산출물: 요구사항 정의, 센서 조합 의사결정, 리스크 체크리스트
