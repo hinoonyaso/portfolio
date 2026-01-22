@@ -190,7 +190,6 @@ pio run -e cart -t upload
 
 https://github.com/addinedu-ros-8th/ros-repo-3.git
 ---
-
 ### 2. COOLRO – 자동추종 골프 캐디 로봇 (자율주행 + 자세 분석)
 
 **한 줄 임팩트**: UART 오류율 **60%↓**, 추종 거리 편차 **±8cm** 달성.
@@ -321,8 +320,116 @@ STM32 firmware: `coolro/stm32_f103_hal/main.c`
 
 https://github.com/hinoonyaso/coolro.git
 ---
+### 3. ROS2 Pick & Place Arm – Gazebo Classic + MoveIt2 (시뮬 기반 매니퓰레이션)
 
-### 3. Pill Guy – 얼굴인식 스마트 알약 디스펜서 (임베디드 제어·예외처리 중심)
+**한 줄 임팩트**: 6-DoF 로봇팔 Pick & Place 자동화 + 100회 스트레스 테스트로 성공률/시간 기록.
+
+**문제 → 선택 → 결과**
+- 문제: 반복 실험 가능한 pick & place 시퀀스와 정량 지표 부재
+- 선택: MoveIt2 액션 기반 계획/실행 + 상태머신/재시도 + CSV 로깅
+- 결과: 성공률/시간/실패 원인을 자동 기록하는 재현 가능한 파이프라인 구축
+
+**Repository**
+- Repo (폴더): `robot_arm_project/robot_arm_pick_place`
+- Repo name 제안: `ros2-pick-place-moveit2`
+
+**README 상단 3-line summary**
+- Gazebo Classic + ros2_control 기반 6-DoF 팔/그리퍼 시뮬레이션
+- MoveIt2 `/move_action` + `/execute_trajectory`로 계획/실행 분리
+- 스트레스 테스트(100회)로 성공률/시간/실패 Top3 자동 기록
+- (Vision, `robot_arm_vision` 브랜치) HSV 색상 검출 + Depth 투영으로 픽 포즈 자동 추정
+
+**Demo**
+- Image: (추가 예정)
+- GIF: (추가 예정)
+- Video: (추가 예정)
+
+**System Architecture**
+```mermaid
+flowchart LR
+  Gazebo[Gazebo Classic] --> ros2_control[ros2_control]
+  ros2_control --> MoveIt[MoveIt2 move_group]
+  MoveIt --> Task[arm_moveit_task state machine]
+  Task --> ros2_control
+  RViz[RViz2 MotionPlanning] --> MoveIt
+```
+
+**Data Flow / Topic Flow**
+- Action: `move_action`(계획), `execute_trajectory`(실행)
+- Service: `/apply_planning_scene`, `/set_entity_state`, `/attach`, `/detach`
+- Topic: `/joint_states`
+- Perception(`robot_arm_vision` 브랜치): `/detected_object_centroid` → `/detected_object_pose` → `/grasp_candidates`
+
+**Design Decisions**
+- Humble 환경에서 `moveit_commander` 대신 액션 기반으로 안정성 확보
+- EE 추종형 attach/detach로 grasp 재현성 향상
+- Position constraint(구형 3cm)로 목표 정밀도 확보
+- (Vision, `robot_arm_vision` 브랜치) HSV 기반 색상 분할로 검출 로직 단순화
+- (Vision, `robot_arm_vision` 브랜치) Depth median window로 센서 노이즈 완화
+- (Vision, `robot_arm_vision` 브랜치) centroid → pose → grasp 후보 분리로 디버깅/확장 용이
+
+**Core Logic**
+- 상태머신: home → reset → pre_grasp → grasp → attach → lift → place → detach → retreat
+- 재시도/타임아웃: `per_stage_timeout_sec`, `max_retries_per_stage` 파라미터
+- 스트레스 테스트: `iterations` 반복 + CSV 로깅
+- (Vision, `robot_arm_vision` 브랜치) 빨간색 객체 중심 검출 → depth 투영 → world frame 변환 → grasp 후보 생성
+
+**Perception / Planning / Control**
+- Perception(`robot_arm_vision` 브랜치): HSV 색상 분할 + Depth 투영 + TF 변환
+- Planning: MoveIt2 Motion Planning
+- Control: ros2_control trajectory controllers
+
+**Build & Run**
+Environment: Ubuntu 22.04 / ROS2 Humble
+```bash
+cd robot_arm_project/robot_arm_pick_place/colcon_ws
+source /opt/ros/humble/setup.bash
+colcon build --symlink-install
+source install/setup.bash
+ros2 launch arm_gazebo bringup_all.launch.py enable_task:=true stress_test:=false
+```
+Perception pipeline:
+```bash
+source install/setup.bash
+# robot_arm_vision 브랜치에서만 사용
+ros2 launch arm_gazebo bringup_all.launch.py enable_task:=true enable_perception:=true use_legacy_perception:=false
+```
+
+**Config / Parameters**
+- `arm_moveit_task/pick_place_task.py`: pose 파라미터, stress_test.* 옵션
+- `arm_moveit_config/config/ompl_planning.yaml`: planner 파라미터
+- (`robot_arm_vision` 브랜치) `arm_moveit_task/perception_node.py`: `red_hsv_*`, `depth_window`, `max_depth_m`
+- (`robot_arm_vision` 브랜치) `arm_moveit_task/color_detector_node.py`: `min_area`, `red_hsv_*`
+- (`robot_arm_vision` 브랜치) `arm_moveit_task/grasp_candidate_node.py`: `grasp_candidate_offsets`, `grasp_candidate_yaws`
+
+**Metrics / Results**
+- 성공률/plan/exec 시간 로그 자동화 (CSV)
+- 실패 Top3: PLAN_FAIL, TIMEOUT, EXEC_FAIL
+
+**Failure Analysis**
+- Plan 실패: IK/충돌 → pre_grasp 오프셋 재시도
+- Timeout: planner range/attempts 조정으로 완화
+
+**Real-world Considerations**
+- 실제 로봇에서는 그리퍼 힘/슬립 보정 필요
+- 센서 기반 물체 위치 추정 불확실성 대응 필요
+
+**Limitations**
+- (Vision) 색상 기반이라 조명/색상 유사 물체에 취약
+- 모바일 베이스 연계 부재
+
+**Portfolio Summary**
+- 상태머신+로깅으로 **재현 가능한 Pick&Place 파이프라인**을 구현
+- MoveIt2 액션 기반 제어와 실패 복구 전략을 정리
+
+**Roadmap**
+- ArUco/Depth 기반 target pose 자동 추정
+- Nav2 연계 모바일 매니퓰레이터 확장
+
+https://github.com/hinoonyaso/robot_arm_project.git
+---
+
+### 4. Pill Guy – 얼굴인식 스마트 알약 디스펜서 (임베디드 제어·예외처리 중심)
 
 **한 줄 임팩트**: 인증 성공률 **15%p↑**, 로그 누락률 **0.5% 이하** 달성.
 
@@ -429,8 +536,7 @@ python3 raspberry_pi/verryberry.py
 
 https://github.com/addinedu-ros-8th/iot-repo-1.git
 ---
-
-### 4. Fitness AI Trainer – 딥러닝 자세 인식 기반 홈 피트니스 트레이너 (Edge AI 최적화)
+### 5. Fitness AI Trainer – 딥러닝 자세 인식 기반 홈 피트니스 트레이너 (Edge AI 최적화)
 
 **한 줄 임팩트**: 프레임 드롭 **30%↓**, 피드백 지연 **120ms → 50ms** 달성.
 
@@ -539,113 +645,4 @@ python3 main.py
 - 실시간 자세 인식과 피드백 파이프라인을 수치로 개선한 프로젝트
 
 https://github.com/addinedu-ros-8th/deeplearning-repo-1.git
----
-
-### 5. ROS2 Pick & Place Arm – Gazebo Classic + MoveIt2 (시뮬 기반 매니퓰레이션)
-
-**한 줄 임팩트**: 6-DoF 로봇팔 Pick & Place 자동화 + 100회 스트레스 테스트로 성공률/시간 기록.
-
-**문제 → 선택 → 결과**
-- 문제: 반복 실험 가능한 pick & place 시퀀스와 정량 지표 부재
-- 선택: MoveIt2 액션 기반 계획/실행 + 상태머신/재시도 + CSV 로깅
-- 결과: 성공률/시간/실패 원인을 자동 기록하는 재현 가능한 파이프라인 구축
-
-**Repository**
-- Repo (폴더): `robot_arm_project/robot_arm_pick_place`
-- Repo name 제안: `ros2-pick-place-moveit2`
-
-**README 상단 3-line summary**
-- Gazebo Classic + ros2_control 기반 6-DoF 팔/그리퍼 시뮬레이션
-- MoveIt2 `/move_action` + `/execute_trajectory`로 계획/실행 분리
-- 스트레스 테스트(100회)로 성공률/시간/실패 Top3 자동 기록
-- (Vision, `robot_arm_vision` 브랜치) HSV 색상 검출 + Depth 투영으로 픽 포즈 자동 추정
-
-**Demo**
-- Image: (추가 예정)
-- GIF: (추가 예정)
-- Video: (추가 예정)
-
-**System Architecture**
-```mermaid
-flowchart LR
-  Gazebo[Gazebo Classic] --> ros2_control[ros2_control]
-  ros2_control --> MoveIt[MoveIt2 move_group]
-  MoveIt --> Task[arm_moveit_task state machine]
-  Task --> ros2_control
-  RViz[RViz2 MotionPlanning] --> MoveIt
-```
-
-**Data Flow / Topic Flow**
-- Action: `move_action`(계획), `execute_trajectory`(실행)
-- Service: `/apply_planning_scene`, `/set_entity_state`, `/attach`, `/detach`
-- Topic: `/joint_states`
-- Perception(`robot_arm_vision` 브랜치): `/detected_object_centroid` → `/detected_object_pose` → `/grasp_candidates`
-
-**Design Decisions**
-- Humble 환경에서 `moveit_commander` 대신 액션 기반으로 안정성 확보
-- EE 추종형 attach/detach로 grasp 재현성 향상
-- Position constraint(구형 3cm)로 목표 정밀도 확보
-- (Vision, `robot_arm_vision` 브랜치) HSV 기반 색상 분할로 검출 로직 단순화
-- (Vision, `robot_arm_vision` 브랜치) Depth median window로 센서 노이즈 완화
-- (Vision, `robot_arm_vision` 브랜치) centroid → pose → grasp 후보 분리로 디버깅/확장 용이
-
-**Core Logic**
-- 상태머신: home → reset → pre_grasp → grasp → attach → lift → place → detach → retreat
-- 재시도/타임아웃: `per_stage_timeout_sec`, `max_retries_per_stage` 파라미터
-- 스트레스 테스트: `iterations` 반복 + CSV 로깅
-- (Vision, `robot_arm_vision` 브랜치) 빨간색 객체 중심 검출 → depth 투영 → world frame 변환 → grasp 후보 생성
-
-**Perception / Planning / Control**
-- Perception(`robot_arm_vision` 브랜치): HSV 색상 분할 + Depth 투영 + TF 변환
-- Planning: MoveIt2 Motion Planning
-- Control: ros2_control trajectory controllers
-
-**Build & Run**
-Environment: Ubuntu 22.04 / ROS2 Humble
-```bash
-cd robot_arm_project/robot_arm_pick_place/colcon_ws
-source /opt/ros/humble/setup.bash
-colcon build --symlink-install
-source install/setup.bash
-ros2 launch arm_gazebo bringup_all.launch.py enable_task:=true stress_test:=false
-```
-Perception pipeline:
-```bash
-source install/setup.bash
-# robot_arm_vision 브랜치에서만 사용
-ros2 launch arm_gazebo bringup_all.launch.py enable_task:=true enable_perception:=true use_legacy_perception:=false
-```
-
-**Config / Parameters**
-- `arm_moveit_task/pick_place_task.py`: pose 파라미터, stress_test.* 옵션
-- `arm_moveit_config/config/ompl_planning.yaml`: planner 파라미터
-- (`robot_arm_vision` 브랜치) `arm_moveit_task/perception_node.py`: `red_hsv_*`, `depth_window`, `max_depth_m`
-- (`robot_arm_vision` 브랜치) `arm_moveit_task/color_detector_node.py`: `min_area`, `red_hsv_*`
-- (`robot_arm_vision` 브랜치) `arm_moveit_task/grasp_candidate_node.py`: `grasp_candidate_offsets`, `grasp_candidate_yaws`
-
-**Metrics / Results**
-- 성공률/plan/exec 시간 로그 자동화 (CSV)
-- 실패 Top3: PLAN_FAIL, TIMEOUT, EXEC_FAIL
-
-**Failure Analysis**
-- Plan 실패: IK/충돌 → pre_grasp 오프셋 재시도
-- Timeout: planner range/attempts 조정으로 완화
-
-**Real-world Considerations**
-- 실제 로봇에서는 그리퍼 힘/슬립 보정 필요
-- 센서 기반 물체 위치 추정 불확실성 대응 필요
-
-**Limitations**
-- (Vision) 색상 기반이라 조명/색상 유사 물체에 취약
-- 모바일 베이스 연계 부재
-
-**Portfolio Summary**
-- 상태머신+로깅으로 **재현 가능한 Pick&Place 파이프라인**을 구현
-- MoveIt2 액션 기반 제어와 실패 복구 전략을 정리
-
-**Roadmap**
-- ArUco/Depth 기반 target pose 자동 추정
-- Nav2 연계 모바일 매니퓰레이터 확장
-
-https://github.com/hinoonyaso/robot_arm_project.git
 ---
