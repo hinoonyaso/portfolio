@@ -353,9 +353,16 @@ https://github.com/hinoonyaso/coolro.git
 - (Vision, `robot_arm_vision` 브랜치) HSV 색상 검출 + Depth 투영으로 픽 포즈 자동 추정
 
 **Demo**
-- Image: (추가 예정)
-- GIF: (추가 예정)
-- Video: (추가 예정)
+- Video(main,vision):
+<p>
+  <a href="video/robot_arm.mp4">
+    <img src="video/robot_arm.png" width="240">
+  </a>
+  <a href="video/robot_arm_vision.mp4">
+    <img src="video/robot_arm_vision.png" width="240">
+  </a>
+</p>
+
 
 **System Architecture**
 ```mermaid
