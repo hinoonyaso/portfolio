@@ -113,7 +113,7 @@ flowchart LR
 - Image: <img width="360" height="320" alt="image" src="https://github.com/user-attachments/assets/2422b2f3-911b-45ab-adce-ad6af130e279" />
          <img width="480" height="320" alt="image" src="https://github.com/user-attachments/assets/50998c64-a21b-48cc-831c-6161c4840a27" />
 
-- GIF: (추가 예정)
+- GIF: ![Dashboard Image 2](https://github.com/user-attachments/assets/1f6ed6ce-8fd7-4b66-a0e9-99cd54573325)
 
 
 **Problem / Goal**
@@ -477,7 +477,7 @@ https://github.com/hinoonyaso/robot_arm_project.git
 
 **Demo**
 - Image: <img width="480" height="320" alt="image" src="https://github.com/user-attachments/assets/43307eeb-95e0-4b6f-9393-57b2177ad22a" />
-- GIF: (추가 예정)
+
 
 **Problem / Goal**
 - 복약 누락/오투약을 줄이기 위한 인증 기반 자동 분배 시스템
@@ -597,7 +597,7 @@ https://github.com/addinedu-ros-8th/iot-repo-1.git
          <img width="240" height="320" alt="image" src="https://github.com/user-attachments/assets/08c8d1c9-9b3f-44e1-a2b1-480d6fcea4af" />
 
 
-- GIF: (추가 예정)
+- GIF: ![Image](https://github.com/user-attachments/assets/fc12cd22-ef3a-408d-b2a1-71b10ff9d416)
 
 **Problem / Goal**
 - 실시간 피드백에서 프레임 드롭/지연을 줄이고 정확도를 확보
