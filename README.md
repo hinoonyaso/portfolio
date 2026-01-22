@@ -46,6 +46,7 @@ Environment: 프로젝트별로 상이 (각 프로젝트 Build & Run 참고)
 **내 역할 (팀 4인)**
 - Nav2 SLAM/경로 계획 파이프라인 구축, TEB Local Planner 튜닝
 - 센서 융합 노드 개발, ArUco 기반 정밀 위치 보정, Domain Bridge 구성
+- micro-ROS(ESP32) 개발은 Docker 기반 툴체인으로 빌드/플래시 환경을 표준화
 
 **Control Concept**
 - 주행 상태를 STANDBY / DRIVING / PRECISION STOP으로 분리해
@@ -205,6 +206,7 @@ https://github.com/addinedu-ros-8th/ros-repo-3.git
 
 **내 역할 (팀 3인)**
 - 추종 제어 로직, MediaPipe 자세 인식/스윙 분석, UART 프로토콜 설계
+- CATIA로 외형/프레임 구조를 설계해 배터리/모터 배치를 사전 검증
 
 **Field Issue Handling**
 - UART 전송 오류 시 포트 재오픈 시도,
