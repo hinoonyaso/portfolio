@@ -76,6 +76,7 @@ flowchart LR
 - Fail-safe stop: 장애물 급접근 시 즉시 정지
 - 로그 레벨 분리: 주행/센서/통신 이벤트 구분 기록
 - 파라미터 롤백: 기본/협소 profile 즉시 복구 플로우
+- GUI 연동: `/main_server/roscar_pose`를 구독해 지도 위 실시간 위치 점 표시 (manager dashboard)
 
 **What I Built (Owner Scope)**
 - `ros-repo-3/roscars/aruco_mapper/aruco_localizer_node.py`
