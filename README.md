@@ -75,14 +75,16 @@ flowchart LR
 **운영 관점**
 - Fail-safe stop: 장애물 급접근 시 즉시 정지
 - 로그 레벨 분리: 주행/센서/통신 이벤트 구분 기록
+- MySQL 로그/상태 DB + ROS 서비스로 GUI에서 로그/상태 조회 (log query, status query)
 - 파라미터 롤백: 기본/협소 profile 즉시 복구 플로우
 - GUI 연동: `/main_server/roscar_pose`를 구독해 지도 위 실시간 위치 점 표시 (manager dashboard)
 
 **What I Built (Owner Scope)**
-- `ros-repo-3/roscars/aruco_mapper/aruco_localizer_node.py`
+- `ros-repo-3/roscars/aruco_mapper/aruco_mapper/aruco_localizer_node.py`
 - `ros-repo-3/roscars/mobile_controller/drive/teb_local_planner.cpp`
 - `ros-repo-3/roscars/mobile_controller/nav_drive/astar.cpp`
 - `ros-repo-3/roscars/mobile_controller/sensor_read/kalman_filter.cpp`
+- `ros-repo-3/gui/manager/view/dashboard_panel.py`
 - `ros-repo-3/shared_interfaces/src/box_is_on_main.cpp`
 - `ros-repo-3/rack/rack_controller/platformio.ini`
 - `ros-repo-3/roscars/cart_controller/platformio.ini`
