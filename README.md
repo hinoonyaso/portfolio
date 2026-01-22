@@ -253,7 +253,16 @@ graph TD
 **Demo**
 - Image: <img width="240" height="320" alt="image" src="https://github.com/user-attachments/assets/6eeffc94-96bc-4c62-91b5-f38999e69a78" />
          <img width="240" height="320" alt="image" src="https://github.com/user-attachments/assets/14d1551c-eb2d-46f0-a517-eca4d078a518" />
-- GIF: (추가 예정)
+- Video:
+<p>
+  <a href="video/motor.MP4">
+    <img src="video/motor.jpg" width="240">
+  </a>
+  <a href="video/coolro.mp4">
+    <img src="video/coolro.png" width="240">
+  </a>
+</p>
+
 
 **Problem / Goal**
 - 엣지 인식/임베디드 제어/클라우드 분석을 하나의 시스템으로 연결
@@ -477,6 +486,9 @@ https://github.com/hinoonyaso/robot_arm_project.git
 
 **Demo**
 - Image: <img width="480" height="320" alt="image" src="https://github.com/user-attachments/assets/43307eeb-95e0-4b6f-9393-57b2177ad22a" />
+- Video: <a href="video/pillguy.MOV">
+  <img src="video/pillguy.png" width="240">
+</a>
 
 
 **Problem / Goal**
