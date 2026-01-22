@@ -110,9 +110,11 @@ flowchart LR
 - 반복 실험/로그 기록으로 주행 안정성 지표를 수치화
 
 **Demo**
-- Image: `/home/sang/Desktop/ros2/img32.png`
+- Image: <img width="360" height="320" alt="image" src="https://github.com/user-attachments/assets/2422b2f3-911b-45ab-adce-ad6af130e279" />
+         <img width="480" height="320" alt="image" src="https://github.com/user-attachments/assets/50998c64-a21b-48cc-831c-6161c4840a27" />
+
 - GIF: (추가 예정)
-- Video: (추가 예정)
+
 
 **Problem / Goal**
 - 단발성 데모가 아닌, **반복 실험/재현 가능한 픽-전달 시스템** 구축
@@ -249,9 +251,9 @@ graph TD
 - 엣지 센싱·임베디드 제어·클라우드 분석을 하나의 파이프라인으로 통합
 
 **Demo**
-- Image: `/home/sang/dev_ws/portpolio/coolro/flutter_app/flutter_01.png`
+- Image: <img width="240" height="320" alt="image" src="https://github.com/user-attachments/assets/6eeffc94-96bc-4c62-91b5-f38999e69a78" />
+         <img width="240" height="320" alt="image" src="https://github.com/user-attachments/assets/14d1551c-eb2d-46f0-a517-eca4d078a518" />
 - GIF: (추가 예정)
-- Video: (추가 예정)
 
 **Problem / Goal**
 - 엣지 인식/임베디드 제어/클라우드 분석을 하나의 시스템으로 연결
@@ -474,8 +476,8 @@ https://github.com/hinoonyaso/robot_arm_project.git
 - Servo 상태머신 + 워터펌프/초음파 제어로 복약 흐름 자동화
 
 **Demo**
+- Image: <img width="480" height="320" alt="image" src="https://github.com/user-attachments/assets/43307eeb-95e0-4b6f-9393-57b2177ad22a" />
 - GIF: (추가 예정)
-- Video: (추가 예정)
 
 **Problem / Goal**
 - 복약 누락/오투약을 줄이기 위한 인증 기반 자동 분배 시스템
@@ -590,9 +592,12 @@ https://github.com/addinedu-ros-8th/iot-repo-1.git
 - TTS 피드백 + GUI 연동으로 즉시 교정 경험 제공
 
 **Demo**
-- Image: `/home/sang/Desktop/deep/img12.png`
+- Image: <img width="360" height="320" alt="image" src="https://github.com/user-attachments/assets/9f5bc563-48d2-4f2f-a051-13c8078c4413" />
+         <img width="240" height="320" alt="image" src="https://github.com/user-attachments/assets/ac5468d4-d11f-4a27-bfcb-eae8ae294609" />
+         <img width="240" height="320" alt="image" src="https://github.com/user-attachments/assets/08c8d1c9-9b3f-44e1-a2b1-480d6fcea4af" />
+
+
 - GIF: (추가 예정)
-- Video: (추가 예정)
 
 **Problem / Goal**
 - 실시간 피드백에서 프레임 드롭/지연을 줄이고 정확도를 확보
