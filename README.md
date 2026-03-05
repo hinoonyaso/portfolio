@@ -14,7 +14,7 @@
 - Repo: https://github.com/hinoonyaso/AI_secretary_robot
 - Tech: ROS2, Nav2, Voice AI, Jetson, Embedded Integration
 - Key Results:
-  - 음성 명령 기반 서비스 시나리오 자동화
+  - STT -> Intent -> LLM -> Robot Action 파이프라인 기반 음성 로봇 제어 시스템
   - 로봇 주행/응답 파이프라인 통합
   - 실사용 중심 기능 검증 및 고도화 진행
 
@@ -33,7 +33,7 @@
          <img width="480" height="320" alt="image" src="https://github.com/user-attachments/assets/50998c64-a21b-48cc-831c-6161c4840a27" />
 
 - GIF: ![Dashboard Image 2](https://github.com/user-attachments/assets/1f6ed6ce-8fd7-4b66-a0e9-99cd54573325)
-  
+
 ## Projects
 
 ### 3. COOLRO - Autonomous Golf Caddie Robot
@@ -98,21 +98,27 @@
 - Key Results:
   - Frame drop 30%↓
   - Feedback latency 120ms -> 50ms
- 
+
 **Demo**
 - Image: <img width="360" height="320" alt="image" src="https://github.com/user-attachments/assets/9f5bc563-48d2-4f2f-a051-13c8078c4413" />
          <img width="240" height="320" alt="image" src="https://github.com/user-attachments/assets/ac5468d4-d11f-4a27-bfcb-eae8ae294609" />
          <img width="240" height="320" alt="image" src="https://github.com/user-attachments/assets/08c8d1c9-9b3f-44e1-a2b1-480d6fcea4af" />
 
-
 - GIF: ![Image](https://github.com/user-attachments/assets/fc12cd22-ef3a-408d-b2a1-71b10ff9d416)
 
 ## Tech Stack
 
-- Robotics: ROS2, Nav2, SLAM, TF2, Sensor Fusion
-- Embedded: STM32, ESP32, UART, micro-ROS
-- AI/CV: MediaPipe, OpenCV, TensorFlow/Keras, YOLO
-- Backend/Infra: TCP/IP, MySQL, Linux, Docker
+Robotics
+ROS2, Nav2, SLAM Toolbox, TF2
+
+Embedded
+STM32, ESP32, UART, micro-ROS
+
+AI / CV
+MediaPipe, OpenCV, TensorFlow, YOLO
+
+Infrastructure
+Linux, Docker, TCP/IP, MySQL
 
 ## Notes
 
