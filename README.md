@@ -27,6 +27,7 @@
   - CTE RMS 30%↓
   - Replan latency 40%↓
   - Precision stop error ±5cm
+
 **Demo**
 - Image: <img width="360" height="320" alt="image" src="https://github.com/user-attachments/assets/2422b2f3-911b-45ab-adce-ad6af130e279" />
          <img width="480" height="320" alt="image" src="https://github.com/user-attachments/assets/50998c64-a21b-48cc-831c-6161c4840a27" />
