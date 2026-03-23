@@ -44,6 +44,7 @@
 - Key Results:
   - PID 연속 조향으로 이산 명령 대비 조향 정밀도 향상 (STM32 100Hz 실시간 루프)
   - 초음파 중앙값 필터로 거리 측정 노이즈 제거
+  
 **Demo**
 - Image: <img width="240" height="320" alt="image" src="https://github.com/user-attachments/assets/6eeffc94-96bc-4c62-91b5-f38999e69a78" />
          <img width="240" height="320" alt="image" src="https://github.com/user-attachments/assets/14d1551c-eb2d-46f0-a517-eca4d078a518" />
