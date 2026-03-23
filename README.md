@@ -37,14 +37,13 @@
 ## Projects
 
 ### 3. COOLRO - Autonomous Golf Caddie Robot
-실시간 사람 추종 + UART 제어 안정화
+실시간 사람 추종 + STM32 PID 조향 제어 + AI 스윙 분석
 
 - Repo: https://github.com/hinoonyaso/coolro.git
-- Tech: Raspberry Pi, MediaPipe Pose, UART, STM32, Flutter, EC2
+- Tech: Raspberry Pi, MediaPipe Pose, OpenCV CLAHE, UART, STM32 PID, Flutter, Firebase, AWS EC2
 - Key Results:
-  - UART error rate 60%↓
-  - Tracking distance variance ±8cm
-
+  - PID 연속 조향으로 이산 명령 대비 조향 정밀도 향상 (STM32 100Hz 실시간 루프)
+  - 초음파 중앙값 필터로 거리 측정 노이즈 제거
 **Demo**
 - Image: <img width="240" height="320" alt="image" src="https://github.com/user-attachments/assets/6eeffc94-96bc-4c62-91b5-f38999e69a78" />
          <img width="240" height="320" alt="image" src="https://github.com/user-attachments/assets/14d1551c-eb2d-46f0-a517-eca4d078a518" />
