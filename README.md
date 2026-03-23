@@ -9,7 +9,7 @@
 ## Featured Project
 
 ### 1. AI Secretary Robot (Flagship)
-오프라인 음성비서 + 자율주행 로봇 통합 프로젝트 (핵심 메인 프로젝트)
+오프라인 음성비서 + 자율주행 로봇 통합 프로젝트 (진행중)
 
 - Repo: https://github.com/hinoonyaso/AI_secretary_robot
 - Tech: ROS2, Nav2, Voice AI, Jetson, Embedded Integration
