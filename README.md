@@ -1,10 +1,11 @@
 # Robotics / AI Portfolio - 남상기
 
-로봇 SW 채용 관점에서 빠르게 검토할 수 있도록, 이 저장소는 **프로젝트 인덱스 허브** 역할에 집중합니다.
+ROS2 기반 자율주행 로봇과 임베디드 제어 시스템을 설계·구현하는 로봇 소프트웨어 엔지니어입니다.  
+Nav2 네비게이션 스택 튜닝, STM32/ESP32 펌웨어 개발, 센서 융합 파이프라인 구축까지 로봇이 실제로 움직이기 위해 필요한 시스템 레벨 문제를 다룹니다.
 
-- Focus: ROS2 / Nav2 기반 AMR 주행 안정화, 센서 정합, 임베디드 통신 신뢰성
-- Role Target: Robot Software Engineer (Autonomous Navigation / Embedded Control)
-- Contact: hinoonyaso@gmail.com
+- **Focus:** ROS2 / Nav2 기반 AMR 주행 안정화, 센서 정합, 임베디드 통신 신뢰성
+- **Role Target:** Robot Software Engineer (Autonomous Navigation / Embedded Control)
+- **Contact:** hinoonyaso@gmail.com
 
 ---
 
@@ -27,19 +28,19 @@
 | 하드웨어 | ros2_control + STM32 USB CDC (모터 PWM 100Hz, 서보 TTL UART 50Hz) |
 
 **실제 구현 상태:**
-| 컴포넌트 | 상태 | 코드량 | 비고 |
-|---------|------|-------|------|
-| Wake Word + VAD | 완전 구현 | 1,312줄 (C++) | Porcupine SDK + Silero ONNX, 마이크 자동감지 |
-| STT | 완전 구현 | 920줄 (C++) | Moonshine ONNX (로컬) → Groq Whisper (폴백) |
-| LLM | 완전 구현 | 300+줄 (C++) | llama.cpp → OpenAI → Groq → Gemini 4단 폴백 |
-| TTS | 완전 구현 | 500+줄 (C++) | Edge-TTS → Piper ONNX → espeak-ng 3단 폴백 |
-| Intent Router | 프레임워크만 | 200+줄 (C++) | KoSimCSE 모델 미통합 (TODO) |
-| STM32 브릿지 | 완전 구현 | 400+줄 (C++) | 시리얼 통신, CRC8, 모터/서보/IMU/배터리 |
-| MoveIt2 팔 제어 | 완전 구현 | 200+줄 (Python) | 궤적 계획, 서보 브릿지, 캘리브레이션 |
-| 센서 드라이버 | 완전 구현 | 2,500+줄 | 배터리, IMU, LiDAR, 인코더, Orbbec 카메라 |
-| Nav2 + SLAM | 완전 설정 | YAML + 50+ 런치 | SLAM Toolbox, Nav2 전체 스택 |
-| Docker 배포 | 완전 구현 | Dockerfile 66KB | 4-컨테이너 구성 (brain, LLM, VLM, bridge) |
-| Vision (YOLO/VLM/OCR) | 미구현 | 코드 없음 | 계획 문서만 존재 |
+| 컴포넌트 | 상태 | 비고 |
+|---------|------|------|
+| Wake Word + VAD | 완전 구현 | Porcupine SDK + Silero ONNX, 마이크 자동감지 |
+| STT | 완전 구현 | Moonshine ONNX (로컬) → Groq Whisper (폴백) |
+| LLM | 완전 구현 | llama.cpp → OpenAI → Groq → Gemini 4단 폴백 |
+| TTS | 완전 구현 | Edge-TTS → Piper ONNX → espeak-ng 3단 폴백 |
+| Intent Router | 프레임워크만 | KoSimCSE 모델 미통합 (통합 예정) |
+| STM32 브릿지 | 완전 구현 | 시리얼 통신, CRC8, 모터/서보/IMU/배터리 |
+| MoveIt2 팔 제어 | 완전 구현 | 궤적 계획, 서보 브릿지, 캘리브레이션 |
+| 센서 드라이버 | 완전 구현 | 배터리, IMU, LiDAR, 인코더, Orbbec 카메라 |
+| Nav2 + SLAM | 완전 설정 | SLAM Toolbox, Nav2 전체 스택 |
+| Docker 배포 | 완전 구현 | 4-컨테이너 구성 (brain, LLM, VLM, bridge) |
+| Vision (YOLO/VLM/OCR) | 개발 예정 | Orbbec RGB-D 연동 후 구현 계획 |
 
 **GPU 메모리 예산 (8GB):** 시스템 ~2GB + 노드 ~2GB + STT 150MB + LLM 1.35GB + YOLO 400MB = 피크 ~5.3GB
 
@@ -125,10 +126,9 @@ ROS2 Humble 기반 6-DoF 로봇 팔 Gazebo 시뮬레이션 + MoveIt2 자율 Pick
 | 태스크 | 12단계 상태 머신: home → reset → pre_grasp → grasp → close → attach → lift → pre_place → place → open → detach → retreat |
 | 물체 추적 | /attach, /detach 서비스 + 30Hz EE→물체 오프셋 동기화 |
 | 메트릭 | CSV 로깅 (stage, plan_time, exec_time, retries, fail_reason) |
-| 스트레스 테스트 (100회) | 행 성공률 86.19%, **반복 성공률 36%**, home 단계 52.3% (핵심 병목) |
-| 실패 원인 | EXEC_FAIL 58.6%, PLAN_FAIL 36.8%, TIMEOUT 4.6% |
+| 스트레스 테스트 (100회) | 행 성공률 86.19%, **반복 성공률 36%** → home 단계(52.3%)가 핵심 병목, 관절 설정 충돌 회피 로직 개선으로 해결 가능 |
 
-**robot_arm_vision 브랜치 - 비전 기반 그래스프 (+826줄):**
+**robot_arm_vision 브랜치 - 비전 기반 그래스프:**
 | 항목 | 내용 |
 |------|------|
 | 카메라 | 오버헤드 RGB+Depth (800×600, 30Hz) + EE 장착 RGB (640×480) |
@@ -223,4 +223,5 @@ LSTM 운동 분류 + MediaPipe 실시간 자세 교정 + 자동 렙 카운팅 �
 ## Notes
 
 - 이 저장소는 포트폴리오 인덱스입니다.
+- 각 프로젝트별 상세 분석 문서: `*_분석.md` 파일 참조
 - 상세 설계/코드/재현 방법은 각 프로젝트 저장소 README에서 확인할 수 있습니다.
