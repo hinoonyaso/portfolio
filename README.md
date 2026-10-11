@@ -13,6 +13,8 @@ Nav2 네비게이션 스택 튜닝, STM32/ESP32 펌웨어 개발, 센서 융합 
 
 ### 1. AI Rover (Flagship)
 
+**ROS 2 기반 메카넘 모바일 매니퓰레이터: 자율주행 + RGB-D 인식 + 로봇 팔 조작 + 미션/관제 통합 프로젝트 (진행중)**
+
 Hiwonder JetRover 위에 ROS 2 Jazzy 기반 자율주행·인식·조작·미션·관제 시스템을 처음부터 쌓아 가는 프로젝트 (진행중). Hiwonder 기본 소프트웨어 없이 STM32(RRC 보드) 프로토콜을 직접 분석해 드라이버부터 구현했습니다.
 
 - Repo: https://github.com/hinoonyaso/AI_rover
