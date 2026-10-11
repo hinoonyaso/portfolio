@@ -11,9 +11,16 @@ Nav2 네비게이션 스택 튜닝, STM32/ESP32 펌웨어 개발, 센서 융합 
 
 ## Featured Project
 
-### 1. AI Rover (Flagship)
+### 1. AI Rover - JetInspect-M (Flagship)
 
-Hiwonder JetRover 위에 ROS 2 Jazzy 기반 자율주행·인식·조작·미션·관제 시스템을 처음부터 쌓아 가는 프로젝트 (진행중). Hiwonder 기본 소프트웨어 없이 STM32(RRC 보드) 프로토콜을 직접 분석해 드라이버부터 구현했습니다.
+**JetRover 기반 Edge AI 멀티모달 자율 설비 점검 및 현장 대응 모바일 매니퓰레이터 (진행중)**
+
+**목표:** 작업자의 음성 지시를 받아 공장·실험실·설비실을 자율주행하며 설비 상태를 점검하고, 이상 발견 시 음성·화면으로 보고하거나 로봇팔로 간단한 현장 조치를 수행하는 로봇. 단순 SLAM/Nav2 데모가 아니라 센서·액추에이터·배터리·Edge 컴퓨팅 자원을 하나의 End-to-End 임무로 통합하는 것이 핵심입니다.
+
+- **MVP 데모:** 음성 임무 → 점검 위치로 자율주행 → 설비(Stack Light) 1종 판정 → 떨어진 부품 1종 Pick & Place → 결과 보고
+- **접근 방식:** 기능 추가 중심이 아니라 표준 ROS2 구조 + 실센서 피드백 + 정량평가 + 회귀 테스트 중심으로 단계별 게이트를 두고 진행
+
+Hiwonder 기본 소프트웨어 없이 STM32(RRC 보드) 프로토콜을 직접 분석해 드라이버부터, 자체 STM32 펌웨어까지 구현했습니다.
 
 - Repo: https://github.com/hinoonyaso/AI_rover
 - Tech: ROS 2 Jazzy, Nav2 (DWB), slam_toolbox, AMCL, robot_localization (EKF), micro-ROS, Jetson Orin Nano 8GB
@@ -29,18 +36,20 @@ Hiwonder JetRover 위에 ROS 2 Jazzy 기반 자율주행·인식·조작·미션
 | 펌웨어 | 자체 STM32 펌웨어 (`firmware/rrc_m4`, RRC / micro-ROS 두 빌드, 호스트 단위시험 완료) |
 | 개발 환경 | VS Code Remote-SSH, PNG 저장 / 웹 스트리밍(web_video_server) 시각화 도구 |
 
-**실제 구현 상태 (2026-10-06 기준):**
+**실제 구현 상태 (2026-10-11 기준):**
 | 컴포넌트 | 상태 | 비고 |
 |---------|------|------|
-| Base driver / IMU / EKF | 완료 | 바닥 주행 1차 검증, odom은 cmd_vel 적분 open-loop |
-| URDF / TF | 거의 완료 | 공식 메쉬 + 팔 + 카메라 TF, 실측 footprint 남음 |
-| LiDAR | 완료 | `/scan` 약 14Hz |
+| Base driver / IMU / EKF | 완료 | 엔코더 기반 wheel odometry 전환 (`wheel_twist_source: auto`), 개루프 정확도 개선 확인 |
+| 자체 STM32 펌웨어 | 완료 | 실기 flash·bring-up, 엔코더(3,996 ticks/rev), 안전 시험(timeout 1.04s, e-stop 0.86s) 통과, 10h 40m 소크 리셋 0 |
+| URDF / TF / LiDAR | 완료 | 공식 메쉬 + 팔 + 카메라 TF, `/scan` 약 14Hz |
 | SLAM / AMCL | 완료 | 지도 저장·실기 검증, loop closure / relocalization 정량평가 남음 |
-| Nav2 (DWB) | 동작 | 실주행 사례 기록, 장애물 회피 튜닝 중 |
+| Nav2 | 완료(잠정) | DWB vs MPPI 각 15회 A/B → 기본값 DWB, MPPI는 변형 보관. 실주행 사용자 확인 충돌 0회 |
 | RGB-D 카메라 / Depth 장애물 | 완료 / 동작 | 근거리 임시 방식, 정량평가 남음 |
-| 로봇팔 저수준 | 완료 | 위치 읽기·명령, torque, home pose (bring-up/진단용) |
-| 자체 STM32 펌웨어 | 부분 | L0(호스트 단위시험) 완료, 실기 flash 전 |
-| MoveIt2 / Vision AI / Mission BT / 웹 관제 / LLM / Voice | 예정 | 마이크·스피커 하드웨어만 확인 |
+| 로봇팔 | 진행 | MoveIt2 + 궤적 브리지 실기 왕복 4/4, 서보 보정(오차 ±1~2 펄스), 접촉 파지 Action 설계(PRD) 완료 |
+| Gazebo 시뮬레이션 | L0 완료 | 메카넘 ros2_control, LiDAR/RGB-D/IMU, 지도→월드 |
+| Vision (YOLO/TensorRT) / Mission BT / 웹 관제 / Voice / LLM | 예정 | 마이크·스피커 하드웨어만 확인 |
+
+**정량 검증 (E6, 30회):** command(open-loop) vs encoder odom을 직선·상자 우회·대각 회전 시나리오에서 번갈아 비교. 직선은 목표 허용 오차(0.15m)가 결과를 좌우해 두 조건이 구분되지 않았음을 확인하고, 측정하지 않은 개선은 주장하지 않는 방식으로 기록 (`docs/benchmarks/`)
 
 **트러블슈팅 사례:** STM32 불규칙 hang(9회 기록)을 배터리 전압·LiDAR 무관임을 분리 진단하고 RST 복구 절차·host watchdog 정리, Jetson 8GB OOM 빌드 멈춤은 병렬도 제한으로 해결 (`troubleshooting/` 문서화)
 
