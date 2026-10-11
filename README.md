@@ -39,15 +39,17 @@ Hiwonder 기본 소프트웨어 없이 STM32(RRC 보드) 프로토콜을 직접 
 **실제 구현 상태 (2026-10-11 기준):**
 | 컴포넌트 | 상태 | 비고 |
 |---------|------|------|
-| Base driver / IMU / EKF | 완료 | 바닥 주행 1차 검증, odom은 cmd_vel 적분 open-loop |
-| URDF / TF | 거의 완료 | 공식 메쉬 + 팔 + 카메라 TF, 실측 footprint 남음 |
-| LiDAR | 완료 | `/scan` 약 14Hz |
+| Base driver / IMU / EKF | 완료 | 엔코더 기반 wheel odometry 전환 (`wheel_twist_source: auto`), 개루프 정확도 개선 확인 |
+| 자체 STM32 펌웨어 | 완료 | 실기 flash·bring-up, 엔코더(3,996 ticks/rev), 안전 시험(timeout 1.04s, e-stop 0.86s) 통과, 10h 40m 소크 리셋 0 |
+| URDF / TF / LiDAR | 완료 | 공식 메쉬 + 팔 + 카메라 TF, `/scan` 약 14Hz |
 | SLAM / AMCL | 완료 | 지도 저장·실기 검증, loop closure / relocalization 정량평가 남음 |
-| Nav2 (DWB) | 동작 | 실주행 사례 기록, 장애물 회피 튜닝 중 |
+| Nav2 | 완료(잠정) | DWB vs MPPI 각 15회 A/B → 기본값 DWB, MPPI는 변형 보관. 실주행 사용자 확인 충돌 0회 |
 | RGB-D 카메라 / Depth 장애물 | 완료 / 동작 | 근거리 임시 방식, 정량평가 남음 |
-| 로봇팔 저수준 | 완료 | 위치 읽기·명령, torque, home pose (bring-up/진단용) |
-| 자체 STM32 펌웨어 | 완료 | 실기 flash·bring-up, 엔코더(3,996 ticks/rev) 전송, 안전 시험(timeout/e-stop) 통과, 10h+ 소크 리셋 0 (2026-10-11) |
-| MoveIt2 / Vision AI / Mission BT / 웹 관제 / LLM / Voice | 예정 | 마이크·스피커 하드웨어만 확인 |
+| 로봇팔 | 진행 | MoveIt2 + 궤적 브리지 실기 왕복 4/4, 서보 보정(오차 ±1~2 펄스), 접촉 파지 Action 설계(PRD) 완료 |
+| Gazebo 시뮬레이션 | L0 완료 | 메카넘 ros2_control, LiDAR/RGB-D/IMU, 지도→월드 |
+| Vision (YOLO/TensorRT) / Mission BT / 웹 관제 / Voice / LLM | 예정 | 마이크·스피커 하드웨어만 확인 |
+
+**정량 검증 (E6, 30회):** command(open-loop) vs encoder odom을 직선·상자 우회·대각 회전 시나리오에서 번갈아 비교. 직선은 목표 허용 오차(0.15m)가 결과를 좌우해 두 조건이 구분되지 않았음을 확인하고, 측정하지 않은 개선은 주장하지 않는 방식으로 기록 (`docs/benchmarks/`)
 
 **트러블슈팅 사례:** STM32 불규칙 hang(9회 기록)을 배터리 전압·LiDAR 무관임을 분리 진단하고 RST 복구 절차·host watchdog 정리, Jetson 8GB OOM 빌드 멈춤은 병렬도 제한으로 해결 (`troubleshooting/` 문서화)
 
