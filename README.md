@@ -11,38 +11,38 @@ Nav2 네비게이션 스택 튜닝, STM32/ESP32 펌웨어 개발, 센서 융합 
 
 ## Featured Project
 
-### 1. AI Secretary Robot (Flagship)
+### 1. AI Rover (Flagship)
 
-오프라인 음성비서 + 자율주행 + 로봇 팔 조작 통합 프로젝트 (진행중)
+Hiwonder JetRover 위에 ROS 2 Jazzy 기반 자율주행·인식·조작·미션·관제 시스템을 처음부터 쌓아 가는 프로젝트 (진행중). Hiwonder 기본 소프트웨어 없이 STM32(RRC 보드) 프로토콜을 직접 분석해 드라이버부터 구현했습니다.
 
-- Repo: https://github.com/hinoonyaso/AI_secretary_robot
-- Tech: ROS2 Humble, Nav2, C++17, Jetson Orin Nano 8GB, CycloneDDS
-- Platform: STM32F407VET6 + Mecanum 4WD + 6DOF Hiwonder Arm + RPLIDAR A1
+- Repo: https://github.com/hinoonyaso/AI_rover
+- Tech: ROS 2 Jazzy, Nav2 (DWB), slam_toolbox, AMCL, robot_localization (EKF), micro-ROS, Jetson Orin Nano 8GB
+- Platform: STM32F407 (RRC 보드, 1 Mbps UART) + Mecanum 4WD + 5-DoF Arm + RPLIDAR A1M8 + Orbbec DaBai DCW (RGB-D)
 
 **시스템 구성:**
 | 계층 | 구성요소 |
 |------|---------|
-| AI 파이프라인 | Porcupine Wake Word → Silero VAD → Moonshine STT → Intent Router → Qwen2.5 LLM → Piper TTS |
-| 네비게이션 | SLAM Toolbox + Nav2 (A* + DWB) + AMCL |
-| 팔 제어 | MoveIt2 + TRAC-IK (위치 공차 1mm) |
-| 하드웨어 | ros2_control + STM32 USB CDC (모터 PWM 100Hz, 서보 TTL UART 50Hz) |
+| 하드웨어 드라이버 | RRC 프로토콜 직접 분석 → `base_node` (모터/IMU/배터리, 크래시 가드, watchdog) |
+| 상태 추정 | robot_localization EKF (`wheel_twist` + IMU yaw rate) |
+| 네비게이션 | SLAM Toolbox + AMCL + Nav2 (DWB) |
+| 인식 | Orbbec RGB-D (TF, 정렬, PointCloud) + depth sparse cloud → costmap 장애물 |
+| 펌웨어 | 자체 STM32 펌웨어 (`firmware/rrc_m4`, RRC / micro-ROS 두 빌드, 호스트 단위시험 완료) |
+| 개발 환경 | VS Code Remote-SSH, PNG 저장 / 웹 스트리밍(web_video_server) 시각화 도구 |
 
-**실제 구현 상태:**
+**실제 구현 상태 (2026-10-06 기준):**
 | 컴포넌트 | 상태 | 비고 |
 |---------|------|------|
-| Wake Word + VAD | 완전 구현 | Porcupine SDK + Silero ONNX, 마이크 자동감지 |
-| STT | 완전 구현 | Moonshine ONNX (로컬) → Groq Whisper (폴백) |
-| LLM | 완전 구현 | llama.cpp → OpenAI → Groq → Gemini 4단 폴백 |
-| TTS | 완전 구현 | Edge-TTS → Piper ONNX → espeak-ng 3단 폴백 |
-| Intent Router | 프레임워크만 | KoSimCSE 모델 미통합 (통합 예정) |
-| STM32 브릿지 | 완전 구현 | 시리얼 통신, CRC8, 모터/서보/IMU/배터리 |
-| MoveIt2 팔 제어 | 완전 구현 | 궤적 계획, 서보 브릿지, 캘리브레이션 |
-| 센서 드라이버 | 완전 구현 | 배터리, IMU, LiDAR, 인코더, Orbbec 카메라 |
-| Nav2 + SLAM | 완전 설정 | SLAM Toolbox, Nav2 전체 스택 |
-| Docker 배포 | 완전 구현 | 4-컨테이너 구성 (brain, LLM, VLM, bridge) |
-| Vision (YOLO/VLM/OCR) | 개발 예정 | Orbbec RGB-D 연동 후 구현 계획 |
+| Base driver / IMU / EKF | 완료 | 바닥 주행 1차 검증, odom은 cmd_vel 적분 open-loop |
+| URDF / TF | 거의 완료 | 공식 메쉬 + 팔 + 카메라 TF, 실측 footprint 남음 |
+| LiDAR | 완료 | `/scan` 약 14Hz |
+| SLAM / AMCL | 완료 | 지도 저장·실기 검증, loop closure / relocalization 정량평가 남음 |
+| Nav2 (DWB) | 동작 | 실주행 사례 기록, 장애물 회피 튜닝 중 |
+| RGB-D 카메라 / Depth 장애물 | 완료 / 동작 | 근거리 임시 방식, 정량평가 남음 |
+| 로봇팔 저수준 | 완료 | 위치 읽기·명령, torque, home pose (bring-up/진단용) |
+| 자체 STM32 펌웨어 | 부분 | L0(호스트 단위시험) 완료, 실기 flash 전 |
+| MoveIt2 / Vision AI / Mission BT / 웹 관제 / LLM / Voice | 예정 | 마이크·스피커 하드웨어만 확인 |
 
-**GPU 메모리 예산 (8GB):** 시스템 ~2GB + 노드 ~2GB + STT 150MB + LLM 1.35GB + YOLO 400MB = 피크 ~5.3GB
+**트러블슈팅 사례:** STM32 불규칙 hang(9회 기록)을 배터리 전압·LiDAR 무관임을 분리 진단하고 RST 복구 절차·host watchdog 정리, Jetson 8GB OOM 빌드 멈춤은 병렬도 제한으로 해결 (`troubleshooting/` 문서화)
 
 ---
 
