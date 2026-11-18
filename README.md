@@ -13,45 +13,46 @@ Nav2 네비게이션 스택 튜닝, STM32/ESP32 펌웨어 개발, 센서 융합 
 
 ### 1. AI Rover - JetInspect-M (Flagship)
 
-**JetRover 기반 Edge AI 멀티모달 자율 설비 점검 및 현장 대응 모바일 매니퓰레이터 (진행중)**
+**JetRover 기반 Edge AI 자율 설비 점검 모바일 매니퓰레이터 · 진행 중**
 
-**목표:** 작업자의 음성 지시를 받아 공장·실험실·설비실을 자율주행하며 설비 상태를 점검하고, 이상 발견 시 음성·화면으로 보고하거나 로봇팔로 간단한 현장 조치를 수행하는 로봇. 단순 SLAM/Nav2 데모가 아니라 센서·액추에이터·배터리·Edge 컴퓨팅 자원을 하나의 End-to-End 임무로 통합하는 것이 핵심입니다.
+Jetson Orin Nano와 메카넘 구동부, RGB-D 카메라, 로봇팔을 결합해 자율주행·인식·조작과 웹 관제를 연결하는 프로젝트입니다. 목표는 현장 음성 지시부터 설비 점검과 조치, 결과 보고까지 이어지는 임무를 구현하는 것입니다.
 
-- **MVP 데모:** 음성 임무 → 점검 위치로 자율주행 → 설비(Stack Light) 1종 판정 → 떨어진 부품 1종 Pick & Place → 결과 보고
-- **접근 방식:** 기능 추가 중심이 아니라 표준 ROS2 구조 + 실센서 피드백 + 정량평가 + 회귀 테스트 중심으로 단계별 게이트를 두고 진행
+- **Repository:** [AI_rover / JetInspect-M](https://github.com/hinoonyaso/AI_rover)
+- **Platform:** Jetson Orin Nano 8GB · STM32F407 RRC 보드 · 메카넘 4WD · 5자유도 로봇팔 · RPLIDAR A1M8 · Orbbec DaBai DCW RGB-D
+- **Tech:** ROS 2 Jazzy · Nav2 · SLAM Toolbox · AMCL · robot_localization · MoveIt2 · Gazebo Harmonic · Open3D · React · FastAPI · MySQL · Qdrant
+- **개발 범위:** RRC 프로토콜 분석과 ROS 2 드라이버, STM32 펌웨어, 주행·인식·조작, 관제 및 실험 도구
 
-Hiwonder 기본 소프트웨어 없이 STM32(RRC 보드) 프로토콜을 직접 분석해 드라이버부터, 자체 STM32 펌웨어까지 구현했습니다.
+| 영역 | 구현 내용과 확인 범위 |
+|------|----------------------|
+| **임베디드·상태 추정** | RRC 시리얼 프로토콜 분석, `base_node`와 STM32 펌웨어 구현. 엔코더·IMU 기반 EKF와 통신 감시, 센서 전용 모드 구성. 펌웨어 실기 적용 및 일부 안전 시험 수행 |
+| **자율주행** | SLAM 지도 생성, AMCL 위치 추정, Nav2 경로 계획·제어와 LiDAR·깊이 장애물 관측. 실기 주행 및 Gazebo 회피 시험을 수행했고, 낮은 장애물의 측후방 회피 안전성은 추가 검증 중 |
+| **인식·로봇팔** | RGB-D 색상 큐브 인식과 3차원 좌표 변환, MoveIt2 계획 및 서보 제어 브리지. 교시 보정 후 색상 큐브 실기 자동 집기 3/3 기록, 조건 확대 및 반복 검증은 남음 |
+| **웹 관제·임무** | React·FastAPI 대시보드에서 로그인·권한, 센서 연결과 카메라, MySQL 이력 및 임무 상태 확인. 임무 생성·실행·취소와 경광등 점검은 모의 또는 Gazebo 환경에서 구현·시험 |
+| **보정 작업 공간** | IMU·휠·오도메트리·LiDAR·RGB-D·로봇팔 등 11개 작업의 측정 또는 수동 입력과 결과 검토. 항목별 적용 범위가 다르며 실기 정확도 검증 진행 중 |
+| **지식 검색·음성** | Qdrant 기반 프로젝트 문서 검색과 출처 확인, 벡터 DB 탐색. Whisper STT·로컬/클라우드 LLM·Piper TTS 단발 음성 경로 실험 |
+| **디지털 트윈** | 실제 RGB-D 스캔을 RTAB-Map과 Open3D로 재구성하고 Blender 텍스처 처리 후 Gazebo 월드에 적용. 미스캔 바닥은 별도 합성 형상으로 보완 |
 
-- Repo: https://github.com/hinoonyaso/AI_rover
-- Tech: ROS 2 Jazzy, Nav2 (DWB), slam_toolbox, AMCL, robot_localization (EKF), micro-ROS, Jetson Orin Nano 8GB
-- Platform: STM32F407 (RRC 보드, 1 Mbps UART) + Mecanum 4WD + 5-DoF Arm + RPLIDAR A1M8 + Orbbec DaBai DCW (RGB-D)
+**구현과 검증 사례**
 
-**시스템 구성:**
-| 계층 | 구성요소 |
-|------|---------|
-| 하드웨어 드라이버 | RRC 프로토콜 직접 분석 → `base_node` (모터/IMU/배터리, 크래시 가드, watchdog) |
-| 상태 추정 | robot_localization EKF (`wheel_twist` + IMU yaw rate) |
-| 네비게이션 | SLAM Toolbox + AMCL + Nav2 (DWB) |
-| 인식 | Orbbec RGB-D (TF, 정렬, PointCloud) + depth sparse cloud → costmap 장애물 |
-| 펌웨어 | 자체 STM32 펌웨어 (`firmware/rrc_m4`, RRC / micro-ROS 두 빌드, 호스트 단위시험 완료) |
-| 개발 환경 | VS Code Remote-SSH, PNG 저장 / 웹 스트리밍(web_video_server) 시각화 도구 |
+- RRC 보드에서 엔코더 **3,996 counts/rev**를 실측해 펌웨어에 반영했습니다. 바퀴를 띄운 시험에서 명령 중단 후 1.04초, 비상 정지 후 0.86초에 바퀴가 멈췄습니다. [펌웨어 시험 기록](https://github.com/hinoonyaso/AI_rover/blob/main/docs/benchmarks/firmware_bringup_20261010.md)
+- 명령 적분과 엔코더 오도메트리를 직선·장애물 우회·대각 회전 시나리오에서 총 30회 비교했습니다. 직선 주행에서는 목표 허용 오차의 영향으로 두 조건의 차이를 구분하지 못했습니다. [비교 결과](https://github.com/hinoonyaso/AI_rover/blob/main/docs/benchmarks/navigation/e6v2_20261011.md)
+- 실제 로봇의 빨간 큐브 집기와 센서·주행을 시험하고, Gazebo에서는 대시보드 임무 API에서 Nav2 주행까지 2회 성공한 기록을 남겼습니다. 실기 전체 임무 연결 및 장시간 안전 검증은 진행 중입니다.
+- 문서 검색에서 벡터 유사도·한국어 부분 문자열·인접 문맥을 결합해, 기존 15개 평가 질문의 지정 근거 포함 수를 **5개 → 12개**로 개선했습니다. 추가 8개 질문에서는 7개를 찾았으며, 작은 표본이므로 일반적인 검색 정확도를 뜻하지 않습니다. [평가 기록](https://github.com/hinoonyaso/AI_rover/blob/main/docs/benchmarks/rag/knowledge-search-improvement-20261118.md)
+- GitHub Actions로 펌웨어 호스트 테스트, Python 정적 검사, ROS 2 Jazzy 빌드·테스트를 실행합니다. 실제 주행의 안전성과 성능을 대체하는 검증은 아닙니다.
 
-**실제 구현 상태 (2026-10-11 기준):**
-| 컴포넌트 | 상태 | 비고 |
-|---------|------|------|
-| Base driver / IMU / EKF | 완료 | 엔코더 기반 wheel odometry 전환 (`wheel_twist_source: auto`), 개루프 정확도 개선 확인 |
-| 자체 STM32 펌웨어 | 완료 | 실기 flash·bring-up, 엔코더(3,996 ticks/rev), 안전 시험(timeout 1.04s, e-stop 0.86s) 통과, 10h 40m 소크 리셋 0 |
-| URDF / TF / LiDAR | 완료 | 공식 메쉬 + 팔 + 카메라 TF, `/scan` 약 14Hz |
-| SLAM / AMCL | 완료 | 지도 저장·실기 검증, loop closure / relocalization 정량평가 남음 |
-| Nav2 | 완료(잠정) | DWB vs MPPI 각 15회 A/B → 기본값 DWB, MPPI는 변형 보관. 실주행 사용자 확인 충돌 0회 |
-| RGB-D 카메라 / Depth 장애물 | 완료 / 동작 | 근거리 임시 방식, 정량평가 남음 |
-| 로봇팔 | 진행 | MoveIt2 + 궤적 브리지 실기 왕복 4/4, 서보 보정(오차 ±1~2 펄스), 접촉 파지 Action 설계(PRD) 완료 |
-| Gazebo 시뮬레이션 | L0 완료 | 메카넘 ros2_control, LiDAR/RGB-D/IMU, 지도→월드 |
-| Vision (YOLO/TensorRT) / Mission BT / 웹 관제 / Voice / LLM | 예정 | 마이크·스피커 하드웨어만 확인 |
+**주요 화면과 실기 데모**
 
-**정량 검증 (E6, 30회):** command(open-loop) vs encoder odom을 직선·상자 우회·대각 회전 시나리오에서 번갈아 비교. 직선은 목표 허용 오차(0.15m)가 결과를 좌우해 두 조건이 구분되지 않았음을 확인하고, 측정하지 않은 개선은 주장하지 않는 방식으로 기록 (`docs/benchmarks/`)
+| 웹 관제 · 센서 현황 | Gazebo 임무 · 가상 경광등 점검 |
+|:---:|:---:|
+| ![샘플 데이터로 표시한 운영 현황 대시보드](https://raw.githubusercontent.com/hinoonyaso/AI_rover/main/docs/images/dashboard-overview-demo.png) | ![샘플 Gazebo 경광등 점검 임무 화면](https://raw.githubusercontent.com/hinoonyaso/AI_rover/main/docs/images/dashboard-mission-demo.png) |
 
-**트러블슈팅 사례:** STM32 불규칙 hang(9회 기록)을 배터리 전압·LiDAR 무관임을 분리 진단하고 RST 복구 절차·host watchdog 정리, Jetson 8GB OOM 빌드 멈춤은 병렬도 제한으로 해결 (`troubleshooting/` 문서화)
+위 화면은 격리된 시험 서버의 **샘플 데이터**입니다. 대시보드 임무 실행은 모의·Gazebo 전용이며, 실제 로봇 구동과 전체 임무 실행은 연결·검증 중입니다.
+
+| RGB-D 스캔 기반 디지털 트윈 | 실제 로봇팔 큐브 집기 |
+|:---:|:---:|
+| ![Open3D에서 연 Blender 텍스처 처리 방 메쉬](https://raw.githubusercontent.com/hinoonyaso/AI_rover/main/docs/images/open3d-scanned-room.png) | ![실제 JetRover 로봇팔의 빨간 큐브 집기](https://raw.githubusercontent.com/hinoonyaso/AI_rover/main/docs/images/cube-gripper-real.gif) |
+
+왼쪽은 RGB-D 스캔을 정합하고 Blender로 텍스처를 처리한 메쉬이며, 오른쪽은 실기 집기 한 차례의 영상입니다. 실제 경광등 설비 판정, 저상 장애물 측후방 회피와 실기 임무 관리자는 추가 검증이 필요합니다.
 
 ---
 
