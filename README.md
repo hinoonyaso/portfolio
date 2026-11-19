@@ -62,16 +62,20 @@ Jetson Orin Nano와 메카넘 구동부, RGB-D 카메라, 로봇팔을 결합해
 
 - Repo: https://github.com/addinedu-ros-8th/ros-repo-3.git
 - Tech: ROS2, Nav2 (NavFn + DWB), Cartographer SLAM, ArUco PID 도킹, YOLOv8n + DeepSORT, PyQt6
+- 기간·팀: 2025.04.09 ~ 2025.05.27 · Secondary Wave 4인
+- **담당:** 주행 기능·경로 계획·웨이포인트, IMU·LiDAR·초음파 통신, ArUco 기반 위치 추정, Domain Bridge 및 통신 구조 설계 ([팀 역할과 구현 범위](https://github.com/addinedu-ros-8th/ros-repo-3#프로젝트-개요))
 
 **시스템 구성:**
 | 계층 | 구성요소 |
 |------|---------|
-| 센서 (C++) | ADS1115 배터리 (I2C), ICM20948 IMU (칼만필터), SLLidar C1 (460800 baud), 초음파 (GPIO) |
+| 센서 (C++) | ADS1115 배터리 (I2C), ICM20948 IMU, SLLidar C1 (460800 baud), 초음파 (GPIO) |
 | SLAM/네비게이션 | Cartographer 2D (0.05m/셀) → Nav2 (20Hz, DWB, 최대 0.3m/s) |
 | 비전 | Picamera2 → UDP → YOLOv8n 감지 + DeepSORT 추적 (2초+ 지속 필터) |
 | 위치 보정 | ArUco 마커 PID 정렬 (44mm, 목표 0.15m, Kp=0.5/1.0) |
 | 백엔드 | TCP 메시지 라우터 + MySQL (SQLAlchemy ORM) + ROS2 액션/서비스 서버 |
 | GUI | PyQt6 매니저 대시보드 + 스태프 QR 태스크 관리 |
+
+**주행 구현과 한계:** 기존 `pinky_violet` 워크스페이스의 Cartographer·모터 노드를 사용하고, 지도 및 Nav2 설정을 조정했습니다. `FollowWaypoints`로 경유지를 순차 주행하고 ArUco 마커의 실측 좌표로 `/initialpose`를 보정했습니다. A*과 TEB는 별도 구현을 시도했지만 최종 주행에는 적용하지 못했고, IMU 칼만 필터 역시 데이터 수집 후 실제 파이프라인 적용은 완료하지 못했습니다. 센서 C++ 퍼블리셔는 GUI 모니터링용이며 주행은 기존 bringup 노드를 사용했습니다. [주행 기술과 시행착오](https://github.com/addinedu-ros-8th/ros-repo-3#주행-기술)
 
 **커스텀 인터페이스:** 메시지 15개, 서비스 3개 (Login, LogQuery, QueryRoscarStatus), 액션 2개 (MoveToGoal, StartDelivery)
 
@@ -87,7 +91,7 @@ Jetson Orin Nano와 메카넘 구동부, RGB-D 카메라, 로봇팔을 결합해
 
 ### 3. COOLRO - Autonomous Golf Caddie Robot
 
-MediaPipe 비전 추적 + STM32 PID 조향 + AI 스윙 분석 골프 캐디 로봇 (대진대 학사 논문, 2024.11)
+MediaPipe 비전 추적 + STM32 PID 조향 + AI 스윙 분석 골프 캐디 로봇 (대진대 학사 논문, 2024.11 · 공동 프로젝트)
 
 - Repo: https://github.com/hinoonyaso/coolro.git
 - Tech: Raspberry Pi 4, MediaPipe 0.10.14, OpenCV 4.9.0, STM32F103C8T6, PyQt5, Flutter, Firebase, AWS EC2
@@ -105,6 +109,8 @@ MediaPipe 비전 추적 + STM32 PID 조향 + AI 스윙 분석 골프 캐디 로�
 | 모바일 | Flutter (GetX, Firebase Auth/Storage/Firestore, Geolocator + OpenWeatherMap) |
 
 **스레딩:** 센서 데몬 (0.1초 간격) + 카메라 데몬 (MediaPipe + 1초 UART) + 메인 (정리)
+
+**서비스 흐름:** Flutter 앱에서 Firebase에 저장한 영상을 EC2 분석 서버에 전송하면, MediaPipe가 팔꿈치·무릎·척추 각도 기반 피드백을 오버레이한 영상을 반환합니다. Raspberry Pi의 로컬 서버는 영상과 18홀 스코어를 앱과 동기화합니다. Fusion 360으로 설계한 프레임과 골프백 지지대를 사용했습니다. [시스템 구성과 구현](https://github.com/hinoonyaso/coolro)
 
 **Demo**
 - Image: <img width="240" height="320" alt="image" src="https://github.com/user-attachments/assets/6eeffc94-96bc-4c62-91b5-f38999e69a78" />
@@ -136,7 +142,9 @@ ROS2 Humble 기반 6-DoF 로봇 팔 Gazebo 시뮬레이션 + MoveIt2 자율 Pick
 | 태스크 | 12단계 상태 머신: home → reset → pre_grasp → grasp → close → attach → lift → pre_place → place → open → detach → retreat |
 | 물체 추적 | /attach, /detach 서비스 + 30Hz EE→물체 오프셋 동기화 |
 | 메트릭 | CSV 로깅 (stage, plan_time, exec_time, retries, fail_reason) |
-| 스트레스 테스트 (100회) | 행 성공률 86.19%, **반복 성공률 36%** → home 단계(52.3%)가 핵심 병목, 관절 설정 충돌 회피 로직 개선으로 해결 가능 |
+| 스트레스 테스트 (100회) | 기록된 행 기준 성공률 86.19%, README에서 정의한 반복 기준 성공률 36%; home 단계 성공률 52.3%, 실패 행 중 EXEC_FAIL 58.6% |
+
+**실험 해석:** 반복 성공률은 해당 반복에 *등장한* 모든 단계가 한 번 이상 성공했는지에 대한 저장소의 집계 기준입니다. 시뮬레이션의 attach/detach는 EE 추종 방식이며 물리적 파지 성공률을 뜻하지 않습니다. 실패 원인을 단계별 CSV로 분석하고 재시도·복구를 구성했습니다. [측정 기준과 결과](https://github.com/hinoonyaso/robot_arm_project#성능-지표-스트레스-테스트-결과)
 
 **robot_arm_vision 브랜치 - 비전 기반 그래스프:**
 | 항목 | 내용 |
@@ -145,7 +153,7 @@ ROS2 Humble 기반 6-DoF 로봇 팔 Gazebo 시뮬레이션 + MoveIt2 자율 Pick
 | 퍼셉션 노드 4개 | color_detector (HSV 빨강 감지) → pose_estimator (깊이→3D+TF) → grasp_candidates (다중 후보) |
 | 색상 감지 | HSV 이중 범위 (H=0-10 + 170-180, S=120+, V=70+), 런타임 SetParameters RPC 변경 |
 | 그래스프 후보 | 오프셋 5개 × yaw 배열, 어태치 거리 검증 (EE↔물체 < 0.05m) |
-| 추가 기능 | 시작 상태 충돌 검증, force_home, 실패 복구, 색상 순환 실험 (빨강/파랑/검정) |
+| 추가 기능 | 시작 상태 충돌 검증, force_home, 실패 복구, 색상 순환 실험 (빨강/파랑/검정), Gazebo 모델과 MoveIt PlanningScene 동기화 |
 | 모드 선택 | 모듈형 (기본) vs 모놀리식 (레거시), `use_legacy_perception` 런치 인자 |
 
 **Demo**
@@ -180,6 +188,8 @@ DeepFace 얼굴 인식 + Arduino 서보 제어 + 스케줄 기반 자동 복약 
 
 **동작:** 얼굴 캡처 → FaceNet512 임베딩 → DB 매칭 → 스케줄 조회 → Arduino 서보 구동 → 로그 기록
 
+**서비스 기능:** 복용 시간 전후 30분 기준으로 일정을 확인하고, 컵 감지 시 워터펌프를 작동합니다. 적외선 센서·LED로 약 부족을 알리고 관리자 화면에서 사용자·약·스케줄을 관리합니다. 의료 현장 안전성이나 인증 성능을 정량 검증했다는 의미는 아닙니다. [프로젝트 기능과 구성](https://github.com/addinedu-ros-8th/iot-repo-1)
+
 **Demo**
 - Image: <img width="480" height="320" alt="image" src="https://github.com/user-attachments/assets/43307eeb-95e0-4b6f-9393-57b2177ad22a" />
 - Video: <a href="video/pillguy.MOV">
@@ -188,25 +198,27 @@ DeepFace 얼굴 인식 + Arduino 서보 제어 + 스케줄 기반 자동 복약 
 
 ---
 
-### 6. Fitness AI Trainer (Edge AI)
+### 6. Fitness AI Trainer
 
 LSTM 운동 분류 + MediaPipe 실시간 자세 교정 + 자동 렙 카운팅 피트니스 시스템
 
 - Repo: https://github.com/addinedu-ros-8th/deeplearning-repo-1.git
 - Tech: TensorFlow/Keras LSTM, MediaPipe, PyQt5, OpenCV, gTTS, MySQL
+- 기간·팀: 2025.03.14 ~ 2025.04.08 · CHICAGO 4인
+- **담당:** 서버 구축 및 연동 ([팀 역할](https://github.com/addinedu-ros-8th/deeplearning-repo-1#preview))
 
 **시스템 구성:**
 | 계층 | 구성요소 |
 |------|---------|
 | 클라이언트 | PyQt5 GUI + 카메라 스레드 + 핸드 제스처 UI 제어 |
 | AI 서버 | UDP 12345: JPEG 프레임 수신 → MediaPipe 24 랜드마크 → LSTM 추론 (시퀀스 30) |
-| 운동 분류 | exercise_classifier.h5 (562KB), 4종 (스쿼트/숄더프레스/니업/런지), 정확도 86% |
+| 운동 분류 | exercise_classifier.h5 (562KB), 4종 (스쿼트/숄더프레스/니업/런지); 저장소에 기록된 시퀀스 30 평가 정확도 86% |
 | 자세 교정 | AngleGuid: 관절 각도 계산 → 정상/비정상 판정 → 빨간색 시각화 + 한국어 TTS |
 | 렙 카운팅 | 관절 각도 상태 머신 기반 자동 카운팅 |
 | 프로토콜 | TCP 1234 (바이너리: [4B 길이][데이터]), 명령 코드 LI/RG/RR/GR/CT/RC/CR |
 | 티어 시스템 | Bronze (30초) / Silver (90초) / Gold (60초) 난이도별 운동 |
 
-**학습 데이터:** 69개 비디오 (스쿼트 26, 숄더프레스 11, 니업 14, 런지 18), 20 에폭, 배치 100
+**학습·평가:** 69개 비디오 (스쿼트 26, 숄더프레스 11, 니업 14, 런지 18), 20 에폭, 배치 100, README에 기록된 train/validation 분할 80:20. 저장소 평가에서 시퀀스 길이 20은 77%, 30은 86%로 기록됐습니다. 제한된 데이터의 결과이며 외부 사용자에 대한 성능을 뜻하지 않습니다. [데이터와 평가](https://github.com/addinedu-ros-8th/deeplearning-repo-1#deep-learning)
 
 **Demo**
 - Image: <img width="360" height="320" alt="image" src="https://github.com/user-attachments/assets/9f5bc563-48d2-4f2f-a051-13c8078c4413" />
@@ -221,17 +233,18 @@ LSTM 운동 분류 + MediaPipe 실시간 자세 교정 + 자동 렙 카운팅 �
 
 | 분류 | 기술 |
 |------|------|
-| Robotics | ROS2 Humble, Nav2, SLAM Toolbox, Cartographer, MoveIt2, ros2_control, TF2 |
+| Robotics | ROS 2 Jazzy / Humble, Nav2, SLAM Toolbox, Cartographer, MoveIt2, ros2_control, TF2 |
 | Embedded | STM32 (F407, F103), ESP32, UART, I2C, GPIO, PWM, micro-ROS |
 | AI / ML | MediaPipe, TensorFlow/Keras, ONNX Runtime, TensorRT, llama.cpp, YOLOv8, DeepFace |
 | Vision | OpenCV, ArUco, HSV 색상 감지, 깊이 카메라 3D 투영 |
-| Voice | Porcupine, Silero VAD, Moonshine STT, Piper TTS, Groq Whisper |
-| App / GUI | PyQt5/6, Flutter (Dart), Firebase, Flask |
-| Infrastructure | Linux, Docker, TCP/IP, UDP, MySQL, SQLAlchemy |
+| Voice | Whisper STT, Piper TTS, 로컬·선택형 클라우드 LLM |
+| App / GUI | React, FastAPI, PyQt5/6, Flutter (Dart), Firebase, Flask |
+| Infrastructure | Linux, Docker, TCP/IP, UDP, MySQL, Qdrant, SQLAlchemy |
 | Hardware | Jetson Orin Nano, Raspberry Pi 4, Arduino, RPLIDAR, Orbbec RGB-D, Mecanum Drive |
 
 ## Notes
 
 - 이 저장소는 포트폴리오 인덱스입니다.
-- 각 프로젝트별 상세 분석 문서: `*_분석.md` 파일 참조
+- 팀 프로젝트의 담당 범위는 원본 저장소에서 확인된 내용만 표시했습니다.
+- [기존 포트폴리오 PDF](Robot%20Software%20Engineer%20Portfolio.pdf)는 2026년 1월에 작성된 별도 자료입니다. TEB 적용 및 일부 정량 수치가 현재 원본 프로젝트 기록과 다르므로 위 README의 최신 설명을 기준으로 확인해 주세요.
 - 상세 설계/코드/재현 방법은 각 프로젝트 저장소 README에서 확인할 수 있습니다.
